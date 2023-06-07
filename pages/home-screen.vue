@@ -43,8 +43,11 @@
                         <h5 class="mt-2">Find Doctors</h5>
                     </v-card>
                 </v-col>
-                <v-col cols="12" class="px-0" v-show="currentEmotion">
-                    <v-btn large block color="primary">Start Daily Log</v-btn>
+                <v-col cols="12" class="px-5">
+                    <v-btn large block flat color="primary" depressed outlined>
+                        <v-icon left>mdi-notebook</v-icon>
+                        Start Daily Diary
+                    </v-btn>
                 </v-col>
             </v-row>
 
@@ -80,6 +83,7 @@
                             color="primary"
                             elevation="0"
                             block
+                            :to="`/tests/${test.id}`"
                         >
                             Take the Test
                         </v-btn>
@@ -91,7 +95,48 @@
       </v-window-item>
       <v-window-item value="1"
       >
-        <h1>Tab 2</h1>
+        <h1>Test History</h1>
+
+        
+
+        <div v-if="test_results == 'EMPTY'" class="text-center">
+            <v-icon class="ma-10" size="60">mdi-file-document-outline</v-icon>
+            <h2 style="font-weight: normal">You have no Tests yet</h2>
+            <v-btn color="primary" class="mt-10" text large>
+                <v-icon left>mdi-plus</v-icon>
+                Take Test
+            </v-btn>
+        </div>
+        <div v-else-if="!test_results.length">
+            <v-skeleton-loader type="list-item-avatar-three-line"></v-skeleton-loader>
+            <v-skeleton-loader type="list-item-avatar-three-line"></v-skeleton-loader>
+        </div>
+        <v-list-item
+            v-else
+            v-for="result in test_results"
+            :key="result.title"
+            link
+            href="#!"
+        >
+            <v-list-item-avatar>
+            <v-icon
+                class="primary"
+                dark
+            >mdi-file-document-outline</v-icon>
+            </v-list-item-avatar>
+
+            <v-list-item-content>
+            <v-list-item-title>{{ result.test_name }} Test</v-list-item-title>
+
+            <v-list-item-subtitle>{{ result.result_percentage }}% Possibility · {{ moment(result.date_added.toDate()).fromNow() }}</v-list-item-subtitle>
+            </v-list-item-content>
+
+            <v-list-item-action>
+            <v-btn icon>
+                <v-icon color="grey lighten-1">mdi-file-download</v-icon>
+            </v-btn>
+            </v-list-item-action>
+        </v-list-item>
       </v-window-item>
       <v-window-item value="2"
       >
@@ -105,7 +150,7 @@
 h1 {
     font-size: 18px;
     text-align: center;
-    margin: 50px 0;
+    margin: 20px 0;
     margin-bottom: 20px;
 }
 
@@ -135,7 +180,8 @@ h1 {
 <script>
 import { mapMutations, mapState } from 'vuex';
 import { app } from '@/server/firebase';
-import { collection, getDocs, getFirestore, orderBy, query } from '@firebase/firestore';
+import { collection, getDocs, getFirestore, orderBy, query, where } from '@firebase/firestore';
+import moment from 'moment';
 
 const db = getFirestore(app);
 
@@ -153,8 +199,41 @@ export default {
         },
     },
 
+    watch: {
+        currentHomePage(newPage, oldPage) {
+
+            if (newPage == "1") {
+                // alert('History Page triggered');
+
+                this.initHistoryPage();
+            }
+
+        }
+    },
+
     methods: {
         ...mapMutations('permaData', ['setNavbarConfig', 'setHomePageSelector']),
+
+        initHistoryPage() {
+
+            this.test_results = [];
+
+            getDocs(query(collection(db, 'test_results'), orderBy('date_added', 'desc'), where('by', '==', this.userData.uid))).then(results => {
+                results.forEach(doc => {
+                    this.test_results.push({id: doc.id, ...doc.data()});
+                });
+
+                console.log(results.size);
+
+                if (results.size < 1) {
+                    this.test_results = "EMPTY";
+                }
+            }).catch(error => {
+                console.error(error);
+                this.test_results = "EMPTY";
+            })
+
+        },
 
         async newQuote() {
             this.dailyQuotes = '';
@@ -177,6 +256,8 @@ export default {
 
     data() {
         return {
+            moment: moment,
+
             dailyQuotes: '',
 
             currentEmotion: '',
@@ -187,32 +268,7 @@ export default {
 
             tests: [],
 
-            emoticons: [
-                {
-                    name: 'Happy',
-                    icon: 'mdi-emoticon-happy',
-                },
-                {
-                    name: 'Sad',
-                    icon: 'mdi-emoticon-sad',
-                },
-                {
-                    name: 'Crying',
-                    icon: 'mdi-emoticon-cry',
-                },
-                {
-                    name: 'Cool',
-                    icon: 'mdi-emoticon-cool',
-                },
-                {
-                    name: 'Excited',
-                    icon: 'mdi-emoticon-excited',
-                },
-                {
-                    name: 'Sick',
-                    icon: 'mdi-emoticon-sick',
-                },
-            ],
+            test_results: [],
         }
     },
     
@@ -237,11 +293,13 @@ export default {
 
        getDocs(query(collection(db, 'tests'), orderBy('date_added', 'desc'))).then(results => {
         results.forEach(doc => {
-            this.tests.push(doc.data());
+            this.tests.push({id: doc.id, ...doc.data()});
         });
        }).catch(error => {
         console.error(error);
        })
+
+       this.initHistoryPage();
 
     }
 }

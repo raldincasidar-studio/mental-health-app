@@ -64,7 +64,7 @@
         v-if="!hideFromPages"
         app
         :background-color="`white`"
-        height="70"
+        height="60"
         shift
         grow
         v-model="currentHomePage"
@@ -125,9 +125,7 @@ export default {
     ...mapState('permaData', ['navbarConfig', 'homePageSelector']),
     hideFromPages() {
 
-      const hiddenFromThisPages = ['/signup', '/collect-data'];
-
-      return hiddenFromThisPages.includes(this.$route.path);
+      return this.navbarConfig?.hideBottomNav
     },
     currentHomePage: {
         get: function() {

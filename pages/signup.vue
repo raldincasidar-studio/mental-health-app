@@ -64,6 +64,7 @@ export default {
             title: 'Get Started',
             goBack: true,
             plain: false,
+            hideBottomNav: true,
         })
     },
 

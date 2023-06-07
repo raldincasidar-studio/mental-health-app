@@ -34,6 +34,7 @@
         <v-btn color="primary" :disabled="isLoading" :loading="isLoading" v-if="!needToSignup && !needToLogin" @click="checkEmail()" block x-large class="mt-10" append-icon="mdi-vuetify">
             Continue
             <v-icon
+            
                 right
                 dark
                 size="25"
@@ -116,6 +117,7 @@ export default {
             title: 'Sign In',
             goBack: true,
             plain: false,
+            hideBottomNav: true,
         })
     },
 
