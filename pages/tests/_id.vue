@@ -37,9 +37,9 @@
             </v-window-item>
             <v-window-item :value="String(questions.length + 1)">
                 <div class="pa-3 end-test">
-                    <v-responsive :aspect-ratio="3/2" class="test-image d-flex align-center px-5">
-                        <h5>Test Result</h5>
-                        <h4>{{ test_score_percentage }}% Positive</h4>
+                    <v-responsive :aspect-ratio="3/2" class="test-image d-flex align-center px-5" :style="{border: `2px solid ${scoreToColor(test_score_percentage)}`}">
+                        <h5 :style="{color: scoreToColor(test_score_percentage)}">Test Result</h5>
+                        <h4 :style="{color: scoreToColor(test_score_percentage)}">{{ test_score_percentage }}% Positive</h4>
                     </v-responsive>
                     <h3 class="text-center mt-10">
                         You have a 
@@ -78,7 +78,7 @@
                         <v-icon left>mdi-doctor</v-icon>
                         Consult a Doctor
                     </v-btn>
-                    <v-btn block text x-large class="mb-3" @click="$router.push('/home-screen')">
+                    <v-btn block text x-large class="mb-3" @click="$router.replace('/tests')">
                         <v-icon left>mdi-refresh</v-icon>
                         Take Another Test
                     </v-btn>
@@ -120,14 +120,12 @@
 
     .test-image  {
         background-color: transparent;
-        outline: 2px dotted#eb1313;
 
         
         h4 {
             text-align: center;
             font-size: 40px;
             margin: 15px 0;
-            color: #eb1313;
         }
 
         h5 {
@@ -172,6 +170,24 @@ export default {
 
     methods: {
         ...mapMutations('permaData', ['setNavbarConfig']),
+
+        scoreToColor(score) {
+
+
+            if (score <= 25) {
+                return '#4CAF50';
+            }
+            if (score <= 50) {
+                return '#FBC02D';
+            }
+            if (score <= 75) {
+                return '#FF9800'
+            }
+            if (score <= 100) {
+                return '#F44336';
+            }
+
+        },
     },
 
     data() {
@@ -230,7 +246,7 @@ export default {
 
     mounted() {
         this.setNavbarConfig({
-            title: `Anxiety Test`,
+            title: `Loading ...`,
             goBack: true,
             plain: true,
             hideBottomNav: true
@@ -244,6 +260,13 @@ export default {
                 const questions = docSnap.data().questions;
 
                 this.info = {id: docSnap.id, ...docSnap.data()};
+
+                this.setNavbarConfig({
+                    title: `${this.info.name} Test`,
+                    goBack: true,
+                    plain: true,
+                    hideBottomNav: true
+                });
 
                 questions.forEach(question => {
                     this.questions.push({

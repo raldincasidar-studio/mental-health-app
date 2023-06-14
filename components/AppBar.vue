@@ -8,6 +8,27 @@
         fixed
         app
         >
+
+        <v-list>
+          <v-list-item>
+            <v-list-item-avatar class="mt-10 mb-0">
+              <v-img :src="`https://api.dicebear.com/6.x/fun-emoji/svg?seed=${userData.uid}&mouth=cute,wideSmile,faceMask,kissHeart,lilSmile,plain,smileLol,smileTeeth&eyes=closed,cute,love,plain,shades,stars,wink,wink2`"></v-img>
+            </v-list-item-avatar>
+          </v-list-item>
+
+          <v-list-item link>
+            <v-list-item-content>
+              <v-list-item-title class="text-h6">
+                {{ userData.first_name }}
+              </v-list-item-title>
+              <v-list-item-subtitle>{{ userData.email }}</v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+
+
+        <v-divider></v-divider>
+
         <v-list>
             <v-list-item
             v-for="(item, i) in items"
@@ -122,7 +143,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('permaData', ['navbarConfig', 'homePageSelector']),
+    ...mapState('permaData', ['navbarConfig', 'homePageSelector', 'userData']),
     hideFromPages() {
 
       return this.navbarConfig?.hideBottomNav
@@ -145,13 +166,13 @@ export default {
       items: [
         {
           icon: 'mdi-apps',
-          title: 'Welcome',
-          to: '/'
+          title: 'Home',
+          to: '/home-screen'
         },
         {
           icon: 'mdi-chart-bubble',
-          title: 'Inspire',
-          to: '/inspire'
+          title: 'Settings',
+          to: '/settings'
         }
       ],
       miniVariant: false,

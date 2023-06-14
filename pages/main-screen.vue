@@ -1,7 +1,7 @@
 <template>
     <div class="content">
         <img src="@/assets/img/app-icon.png" alt="App Icon">
-        <h1>MindBloom</h1>
+        <h1>MindfulAid</h1>
         <p>Your personal sanctuary for mental well-being. Our intuitive app offers a seamless journey towards a healthier, happier you.</p>
 
         <v-btn color="primary" block x-large append-icon="mdi-vuetify" to="/signup">

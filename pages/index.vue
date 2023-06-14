@@ -2,7 +2,7 @@
   <div class="main-page d-flex justify-center align-center">
     <div class="content">
       <img src="@/assets/img/app-icon.png" alt="App Icon">
-      <h1 class="text-blue">MindBloom</h1>
+      <h1 class="text-blue">MindfulAid</h1>
 
       <div class="progress-bar" v-if="beginLoad">
         <v-progress-circular

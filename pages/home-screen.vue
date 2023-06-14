@@ -1,7 +1,7 @@
 <template>
 <app-bar>
 
-    <v-window :value="currentHomePage" height="100%">
+    <v-window :value="currentHomePage" height="100%" :swipeable="false">
       <v-window-item value="0"
       >
         
@@ -11,7 +11,7 @@
             <v-card v-else background-color="grey-lighten-3">
                 <v-carousel height="200" hide-delimiters cycle hide-arrows show-arrows-on-hover :show-arrows="false">
                     <v-carousel-item>
-                        <iframe src="http://www.youtube.com/embed/54sDdNa9vek?autoplay=1&modestbranding=1&rel=0&fs=0&color=white&controls=0&disablekb=1" style="width: 100%" height="200" title="A YouTube video" frameborder="0"></iframe>
+                        <iframe src="http://www.youtube.com/embed/54sDdNa9vek?autoplay=0&modestbranding=1&rel=0&fs=0&color=white&controls=0&disablekb=1" style="width: 100%" height="200" title="A YouTube video" frameborder="0"></iframe>
                     </v-carousel-item>
                     <v-carousel-item
                         v-for="(poster, i) in posters"
@@ -26,13 +26,13 @@
 
             <v-row class="d-flex align-center">
                 <v-col cols="4" class="pa-0 m-0">
-                    <v-card class="text-center pa-5 rounded-lg m-0 selections" elevation="0" v-ripple="{ class: `primary--text` }">
+                    <v-card class="text-center pa-5 rounded-lg m-0 selections" link to="/tests" elevation="0" v-ripple="{ class: `primary--text` }">
                         <v-icon size="60" color="primary">mdi-note-edit-outline</v-icon>
                         <h5 class="mt-2">Test Yourself</h5>
                     </v-card>
                 </v-col>
                 <v-col cols="4" class="pa-0 m-0">
-                    <v-card class="text-center pa-5 rounded-lg m-0 selections" elevation="0" v-ripple="{ class: `primary--text` }">
+                    <v-card class="text-center pa-5 rounded-lg m-0 selections" elevation="0" @click="setHomePageSelector('1')" v-ripple="{ class: `primary--text` }">
                         <v-icon size="60" color="primary">mdi-file-chart</v-icon>
                         <h5 class="mt-2">Get Report</h5>
                     </v-card>
@@ -90,6 +90,15 @@
                         </v-card-actions>
                     </v-card>
                 </v-window-item>
+                <v-window-item>
+                    <v-sheet width="100%" height="300" light class="d-flex flex-column justify-center align-center">
+                        <v-icon size="60" color="primary">mdi-note-edit-outline</v-icon>
+                        <h2 class="grey--text text--darken-2 ma-5" style="font-weight: lighter">View All Tests</h2>
+                        <v-btn color="primary" large to="/tests" outlined>
+                            View All
+                        </v-btn>
+                    </v-sheet>
+                </v-window-item>
             </v-window>
         </div>
       </v-window-item>
@@ -116,7 +125,7 @@
             v-for="result in test_results"
             :key="result.title"
             link
-            href="#!"
+            :to="`/results/${result.id}`"
         >
             <v-list-item-avatar>
             <v-icon
@@ -180,7 +189,7 @@ h1 {
 <script>
 import { mapMutations, mapState } from 'vuex';
 import { app } from '@/server/firebase';
-import { collection, getDocs, getFirestore, orderBy, query, where } from '@firebase/firestore';
+import { collection, getDocs, getFirestore, limit, orderBy, query, where } from '@firebase/firestore';
 import moment from 'moment';
 
 const db = getFirestore(app);
@@ -291,7 +300,7 @@ export default {
         console.error(error);
        })
 
-       getDocs(query(collection(db, 'tests'), orderBy('date_added', 'desc'))).then(results => {
+       getDocs(query(collection(db, 'tests'), orderBy('date_added', 'desc'), limit(3))).then(results => {
         results.forEach(doc => {
             this.tests.push({id: doc.id, ...doc.data()});
         });
