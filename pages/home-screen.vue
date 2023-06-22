@@ -43,10 +43,16 @@
                         <h5 class="mt-2">Find Doctors</h5>
                     </v-card>
                 </v-col>
-                <v-col cols="12" class="px-5">
-                    <v-btn link to="/daily-diary" large block flat color="primary" depressed outlined>
+                <v-col cols="12" class="px-5" v-if="canStartDailyDiary">
+                    <v-btn link to="/daily-diary" x-large block class="gradient-violet" depressed dark>
                         <v-icon left>mdi-notebook</v-icon>
                         Start Daily Diary
+                    </v-btn>
+                </v-col>
+                <v-col cols="12" class="px-5">
+                    <v-btn @click="testingNotif()" x-large block class="gradient-violet" depressed dark>
+                        <v-icon left>mdi-bell</v-icon>
+                        START DEBUG NOTIFICATION
                     </v-btn>
                 </v-col>
             </v-row>
@@ -111,8 +117,9 @@
                 color="primary"
                 full-width
                 no-title
-                :events="diaries"
+                :events="getDiariesDate"
                 :event-color="colorDate"
+                @change="viewRant"
             ></v-date-picker>
         </div>
 
@@ -183,6 +190,33 @@ h1 {
     }
 }
 
+.gradient-violet {
+    background: #4776E6;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(270deg, #4776e6, #4776e6);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(270deg, #4776e6, #4776e6);
+    background-size: 400% 400%;
+
+    -webkit-animation: MovingGradient 3s ease infinite;
+    -moz-animation: MovingGradient 3s ease infinite;
+    animation: MovingGradient 3s ease infinite;
+}
+
+@-webkit-keyframes MovingGradient {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 51%}
+    100%{background-position:0% 50%}
+}
+@-moz-keyframes MovingGradient {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 51%}
+    100%{background-position:0% 50%}
+}
+@keyframes MovingGradient {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 51%}
+    100%{background-position:0% 50%}
+}
+
 .featured-article {
     h2 {
         font-size: 18px;
@@ -217,6 +251,11 @@ export default {
                 return this.setHomePageSelector(value)
             }
         },
+        getDiariesDate() {
+            return [...new Set( this.diaries.map(diary => {
+                return moment(diary.date_added?.toDate()).format('YYYY-MM-DD')
+            }) )]
+        }
     },
 
     watch: {
@@ -228,26 +267,67 @@ export default {
                 this.initHistoryPage();
             }
 
+            if (newPage == "0") {
+                this.initHomePage();
+            }
+
         }
     },
 
     methods: {
         ...mapMutations('permaData', ['setNavbarConfig', 'setHomePageSelector']),
 
+        testingNotif() {
+            cordova.plugins.notification.local.schedule({
+                id: 1,
+                title: "My First Notification",
+                message: "Grabe ba",
+                firstAt: new Date(), // firstAt and at properties must be an IETF-compliant RFC 2822 timestamp
+                every: "minute", // this also could be minutes i.e. 25 (int)
+            });
+        },
+
+        viewRant(date) {
+
+            const [rant_id] = this.diaries.filter(diary => moment(diary.date_added?.toDate()).format('YYYY-MM-DD') === date).map(diary => {
+                return diary.id;
+            }).slice(0,1);
+
+            console.log('Rant: ', date, rant_id)
+
+            if (rant_id) this.$router.push(`/mood/${rant_id}`);
+            
+
+
+        },
+
         colorDate(date) {
-            return ['green','red'];
+            
+            return this.diaries.filter(diary => moment(diary.date_added?.toDate()).format('YYYY-MM-DD') === date).map(diary => {
+                return diary.color;
+            }).slice(0,1);
+
+        },
+
+        initHomePage() {
+            getDocs(query(collection(db, 'diary'), where('date_added', '>=', new Date(moment().format('YYYY-MM-DD'))), where('by', '==', this.userData.uid))).then(results => {
+                console.log(results.size);
+                if (results.size < 1) {
+                    this.canStartDailyDiary = true;
+                }
+            });
         },
 
         initHistoryPage() {
 
             this.test_results = [];
+            this.diaries = [];
 
             getDocs(query(collection(db, 'test_results'), orderBy('date_added', 'desc'), where('by', '==', this.userData.uid))).then(results => {
                 results.forEach(doc => {
                     this.test_results.push({id: doc.id, ...doc.data()});
                 });
 
-                console.log(results.size);
 
                 if (results.size < 1) {
                     this.test_results = "EMPTY";
@@ -255,6 +335,15 @@ export default {
             }).catch(error => {
                 console.error(error);
                 this.test_results = "EMPTY";
+            })
+
+            // DIARIES FETCH
+            getDocs(query(collection(db, 'diary'), orderBy('date_added', 'asc'), where('by', '==', this.userData.uid))).then(results => {
+                results.forEach(doc => {
+                    this.diaries.push({id: doc.id, ...doc.data()});
+                });
+            }).catch(error => {
+                console.error(error);
             })
 
         },
@@ -289,6 +378,8 @@ export default {
             tab: '0',
 
             posters: [],
+
+            canStartDailyDiary: false,
 
             tests: [],
 
@@ -327,6 +418,7 @@ export default {
         console.error(error);
        })
 
+       this.initHomePage();
        this.initHistoryPage();
 
     }

@@ -1,54 +1,43 @@
 <template>
     <app-bar>
         
-        <h1 class="text-center grey--text text--darken-2 mt-10">How are you {{userData.first_name}}?</h1>
-        <div class="status-bar d-flex align-center justify-center">
-            <v-chip
-                class="ma-2"
-                color="white"
-                text-color="grey darken-1"
-                >
-                <v-icon left>
-                    mdi-calendar-blank
-                </v-icon>
-                {{ moment().format('MMMM DD, YYYY') }}
-            </v-chip>
+        <div class="skeletons" v-if="!info.mood">
+            <v-skeleton-loader type="avatar" class="d-flex justify-center my-2 mt-10"></v-skeleton-loader>
+            <v-skeleton-loader type="text" class="d-flex justify-center my-2"></v-skeleton-loader>
+            <v-skeleton-loader type="heading" class="d-flex justify-center my-2"></v-skeleton-loader>
+            <v-skeleton-loader type="text" class="my-2 mb-0 mt-10"></v-skeleton-loader>
+            <v-skeleton-loader type="text"></v-skeleton-loader>
+            <v-skeleton-loader type="text"></v-skeleton-loader>
+            <v-skeleton-loader type="sentences" class=""></v-skeleton-loader>
         </div>
-
-        <transition mode="out-in" name="fade">
-            <div key="icon" class="icon-container ma-2 d-flex flex-wrap justify-center" v-if="!moodSelected.mood">
-                <v-card class="pa-3 py-5 rounded-pill ma-2 text-center overflow-hidden" :style="{color: mood.color}" @click="moodSelected = mood" :class="{'mood-selected': moodSelected.mood === mood.mood}" elevation="0" v-for="(mood, i) in moods" :key="i">
-                    <v-icon :color="moodSelected.mood === mood.mood ? mood.color : 'grey'" size="60">{{ mood.icon }}</v-icon>
-                    <h5 class="grey--text mt-2">{{ mood.mood }}</h5>
-                </v-card>
-            </div>
-            <div key="rant" class="ma-2 text-center" v-else>
-                    <v-chip
-                        class="ma-2 my-5"
-                        :color="moodSelected.color"
-                        text-color="white"
-                        close
-                        :disabled="isLoading"
-                        @click:close="moodSelected = {}"
+        <div v-else>
+            
+            <p class="text-center mb-0 mt-10">
+                <v-icon size="70" :color="info.color">{{ info.icon }}</v-icon>
+            </p>
+            <h1 class="text-center grey--text text--darken-2 mt-2">{{info.userData?.first_name}}'s Feeling {{ info.mood }}</h1>
+            <div class="status-bar d-flex align-center justify-center">
+                <v-chip
+                    class="ma-2"
+                    color="white"
+                    text-color="grey darken-1"
                     >
-                    <v-icon left size="30">
-                        {{ moodSelected.icon }}
+                    <v-icon left>
+                        mdi-calendar-blank
                     </v-icon>
-                    Feeling {{ moodSelected.mood }}
+                    {{ moment(info.date_added.toDate()).format('MMMM DD, YYYY hh:mm A') }}
                 </v-chip>
-                <v-textarea 
-                    :disabled="isLoading"
-                    v-model="description"
-                    :prepend-inner-icon="moodSelected.icon"
-                    outlined
-                    :color="moodSelected.color"
-                    :placeholder="`Tell me the reason why  you're ${moodSelected?.mood.toLowerCase()}`"
-                    height="250"
-                ></v-textarea>
-
-                <v-btn block large @click="saveDiary()" :loading="isLoading" :disabled="isLoading || description.length < 1" :color="moodSelected.color || 'primary'">Save Diary!</v-btn>
             </div>
-        </transition>
+            
+            <style>
+                :root {
+                    --emoteColor: {{ info.color }}
+                }
+            </style>
+            <div class="ma-2 notebook-stype ma-2" :data-color="info.color">
+                {{ info.text }}
+            </div>
+        </div>
     </app-bar>
 </template>
 
@@ -58,16 +47,31 @@ h1 {
     font-weight: lighter;
 }
 
+.notebook-stype {
+    font-size: 19px;
+    font-family: 'Times New Roman', Times, serif;
+    line-height: 40px;
+    text-align: justify;
+}
+
+.notebook-stype:first-letter {
+    font-size: 80px;
+    color: var(--emoteColor); 
+    initial-letter: 2;
+}
+
 .mood-selected {
     outline: 2px solid;
 }
 
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
 }
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+
+.v-enter-from,
+.v-leave-to {
   opacity: 0;
-  transition-delay: 300ms;
 }
 
 </style>
@@ -75,7 +79,7 @@ h1 {
 <script>
 import { mapMutations, mapState } from 'vuex';
 import moment from 'moment';
-import { serverTimestamp, addDoc, collection, updateDoc, doc, getFirestore } from 'firebase/firestore' 
+import { serverTimestamp, addDoc, collection, updateDoc, doc, getFirestore, getDoc } from 'firebase/firestore' 
 import { app } from '@/server/firebase';
 
 const db = getFirestore(app);
@@ -88,6 +92,7 @@ export default {
             isLoading: false,
             moment: moment,
             moodSelected: {},
+            info: {},
             description: '',
             moods: [
                 { mood: 'Happy', icon: 'mdi-emoticon-happy', color: '#FFC300' },
@@ -169,11 +174,38 @@ export default {
 
     mounted() {
         this.setNavbarConfig({
-            title: `Current Mood`,
+            title: `Loading ...`,
             goBack: true,
             plain: true,
             hideBottomNav: true
         });
+
+        const docRef = doc(db, "diary", this.$route.params.id);
+        getDoc(docRef).then(docSnap => {
+            if (docSnap.exists()) {
+                const questions = docSnap.data().questions;
+
+                this.info = {id: docSnap.id, ...docSnap.data()};
+
+                this.setNavbarConfig({
+                    title: `${moment(this.info.date_added.toDate()).format('MMM Do YY')} ${this.info.userData.first_name}'s Diary`,
+                    goBack: true,
+                    plain: true,
+                    hideBottomNav: true
+                });
+
+                questions.forEach(question => {
+                    this.questions.push({
+                        content: question,
+                        answer: null
+                    })
+                });
+            } else {
+                // docSnap.data() will be undefined in this case
+                console.log('🔴 NO DATA');
+                this.$router.replace('/home-screen');
+            }
+        })
     }
 
 }

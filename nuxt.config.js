@@ -25,7 +25,19 @@ export default {
       { name: "format-detection", content: "telephone=no" },
     ],
     link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
+    script: [
+      {
+        src: "/cordova.js",
+        type: "text/javascript",
+      },
+    ],
   },
+  scripts: [
+    {
+      src: "/cordova.js",
+      type: "text/javascript",
+    },
+  ],
 
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: ["@/assets/css/global.css"],
@@ -48,7 +60,7 @@ export default {
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
-  modules: ["@nuxtjs/axios", 'vue-sweetalert2/nuxt'],
+  modules: ["@nuxtjs/axios", "vue-sweetalert2/nuxt"],
 
   axios: {
     progress: false,
@@ -87,5 +99,12 @@ export default {
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
-  build: {},
+  build: {
+    publicPath: "mha/",
+  },
+
+  // Generate
+  generate: {
+    dir: "MentalHealthApp/www",
+  },
 };
