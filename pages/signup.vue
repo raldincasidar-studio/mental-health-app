@@ -7,10 +7,6 @@
                 <v-icon :color="userType == 'Patient' ? 'primary' : 'grey lighten-1'" size="100">mdi-account</v-icon>
                 <h4>I'm a Patient</h4>
             </v-card>
-            <v-card class="text-center pa-3 py-10 my-5 border-3-transparent rounded-lg hidden-border" :class="{'selected': userType == 'Guardian'}" @click="userType = 'Guardian'">
-                <v-icon :color="userType == 'Guardian' ? 'primary' : 'grey lighten-1'" size="100">mdi-account-multiple</v-icon>
-                <h4>I'm a Guardian</h4>
-            </v-card>
             <v-card class="text-center pa-3 py-10 my-5 border-3-transparent rounded-lg hidden-border" :class="{'selected': userType == 'Doctor'}" @click="userType = 'Doctor'">
                 <v-icon :color="userType == 'Guardian' ? 'primary' : 'grey lighten-1'" size="100">mdi-doctor</v-icon>
                 <h4>I'm a Doctor</h4>

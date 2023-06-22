@@ -44,7 +44,7 @@
                     </v-card>
                 </v-col>
                 <v-col cols="12" class="px-5">
-                    <v-btn large block flat color="primary" depressed outlined>
+                    <v-btn link to="/daily-diary" large block flat color="primary" depressed outlined>
                         <v-icon left>mdi-notebook</v-icon>
                         Start Daily Diary
                     </v-btn>
