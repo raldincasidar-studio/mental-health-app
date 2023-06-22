@@ -104,9 +104,20 @@
       </v-window-item>
       <v-window-item value="1"
       >
-        <h1>Test History</h1>
+
+        <div class="calendar-container">
+            <v-date-picker
+                v-model="picker"
+                color="primary"
+                full-width
+                no-title
+                :events="diaries"
+                :event-color="colorDate"
+            ></v-date-picker>
+        </div>
 
         
+        <h1>Test History</h1>
 
         <div v-if="test_results == 'EMPTY'" class="text-center">
             <v-icon class="ma-10" size="60">mdi-file-document-outline</v-icon>
@@ -223,6 +234,10 @@ export default {
     methods: {
         ...mapMutations('permaData', ['setNavbarConfig', 'setHomePageSelector']),
 
+        colorDate(date) {
+            return ['green','red'];
+        },
+
         initHistoryPage() {
 
             this.test_results = [];
@@ -278,6 +293,10 @@ export default {
             tests: [],
 
             test_results: [],
+
+            picker: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
+
+            diaries: ['2023-06-06']
         }
     },
     
