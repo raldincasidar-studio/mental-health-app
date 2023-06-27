@@ -10,9 +10,6 @@
             <v-skeleton-loader type="image" v-if="posters.length < 1"></v-skeleton-loader>
             <v-card v-else background-color="grey-lighten-3">
                 <v-carousel height="200" hide-delimiters cycle hide-arrows show-arrows-on-hover :show-arrows="false">
-                    <v-carousel-item>
-                        <iframe src="http://www.youtube.com/embed/54sDdNa9vek?autoplay=0&modestbranding=1&rel=0&fs=0&color=white&controls=0&disablekb=1" style="width: 100%" height="200" title="A YouTube video" frameborder="0"></iframe>
-                    </v-carousel-item>
                     <v-carousel-item
                         v-for="(poster, i) in posters"
                         :key="i"
@@ -47,12 +44,6 @@
                     <v-btn link to="/daily-diary" x-large block class="gradient-violet" depressed dark>
                         <v-icon left>mdi-notebook</v-icon>
                         Start Daily Diary
-                    </v-btn>
-                </v-col>
-                <v-col cols="12" class="px-5">
-                    <v-btn @click="testingNotif()" x-large block class="gradient-violet" depressed dark>
-                        <v-icon left>mdi-bell</v-icon>
-                        START DEBUG NOTIFICATION
                     </v-btn>
                 </v-col>
             </v-row>
@@ -192,8 +183,8 @@ h1 {
 
 .gradient-violet {
     background: #4776E6;  /* fallback for old browsers */
-    background: -webkit-linear-gradient(270deg, #4776e6, #4776e6);  /* Chrome 10-25, Safari 5.1-6 */
-    background: linear-gradient(270deg, #4776e6, #4776e6);
+    background: -webkit-linear-gradient(270deg, #4776e6, #45B3E0);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(270deg, #4776e6, #45B3E0);
     background-size: 400% 400%;
 
     -webkit-animation: MovingGradient 3s ease infinite;

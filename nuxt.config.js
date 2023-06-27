@@ -30,11 +30,19 @@ export default {
         src: "/cordova.js",
         type: "text/javascript",
       },
+      {
+        src: "/script.js",
+        type: "text/javascript",
+      },
     ],
   },
   scripts: [
     {
       src: "/cordova.js",
+      type: "text/javascript",
+    },
+    {
+      src: "/script.js",
       type: "text/javascript",
     },
   ],

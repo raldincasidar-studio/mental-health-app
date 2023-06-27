@@ -36,9 +36,9 @@
 
 <script>
 import { app } from '@/server/firebase';
-import { doc, getDoc, getFirestore } from '@firebase/firestore';
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { mapMutations } from 'vuex';
+import { doc, getDoc, getFirestore, updateDoc } from '@firebase/firestore';
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { mapMutations, mapState } from 'vuex';
 
 const db = getFirestore(app);
 const auth = getAuth();
@@ -54,6 +54,9 @@ export default {
   methods: {
     ...mapMutations('permaData', ['setUserData']),
   },
+  computed: {
+    ...mapState('permaData', ['userData'])
+  },
   mounted() {
     setTimeout( () => {
       this.beginLoad = true;
@@ -67,14 +70,24 @@ export default {
           const uid = user.uid;
 
           // SUCCESSFUL SIGNUP, GET USER DATA
+          await updateDoc(doc(db, "user", user.uid), {
+            notificationId: window.notificationRegistrationId || 'NONE'
+          })
+
           const userData = await getDoc(doc(db, "user", user.uid));
 
           this.setUserData(userData.data());
+
           this.$router.replace('/home-screen');
           // ...
         } else {
           // User is signed out
           // ...
+          if (this.userData.notificationId) {
+            await updateDoc(doc(db, "user", this.userData.uid), {
+              notificationId: 'NONE'
+            })  
+          }
           this.setUserData({});
           this.$router.replace('/main-screen');
         }

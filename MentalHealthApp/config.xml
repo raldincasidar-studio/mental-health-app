@@ -18,8 +18,12 @@
 
     <platform name="android">
         <!--  Needed for Android 12  -->
+        <!-- PUSH NOTIFICATION -->
+        <resource-file src="google-services.json" target="/app/google-services.json" />
+        
         <preference name="SplashScreen" value="none"/>
         <preference name="AndroidXEnabled" value="true" />
+        
         <icon density="ldpi" src="res/icon/android/ldpi.png"/>
         <icon density="mdpi" src="res/icon/android/mdpi.png"/>
         <icon density="hdpi" src="res/icon/android/hdpi.png"/>

@@ -86,7 +86,7 @@
 <script>
 import { mapMutations, mapState } from 'vuex';
 import { app } from '@/server/firebase';
-import { getFirestore, setDoc, doc, getDoc } from "firebase/firestore";
+import { getFirestore, setDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 
 const db = getFirestore(app);
@@ -145,6 +145,11 @@ export default {
 
             const user = request.user;
 
+            // Add the notificationId
+            await updateDoc(doc(db, "user", user.uid), {
+                notificationId: window.notificationRegistrationId || 'NONE'
+            })
+
             // SUCCESSFUL SIGNUP, GET USER DATA
             const userData = await getDoc(doc(db, "user", user.uid));
 
@@ -187,6 +192,9 @@ export default {
                     address: this.address,
                     phone_number: this.phone_number,
                     userType: this.userTypeSelected,
+                    
+                    // Add the notificationId
+                    notificationId: window.notificationRegistrationId || 'NONE'
                 });
             } catch (error) {
                 console.log(error);

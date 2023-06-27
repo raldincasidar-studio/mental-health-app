@@ -121,10 +121,11 @@
 
 <script>
 import { getAuth, signOut } from '@firebase/auth';
+import { updateDoc, doc, getFirestore } from '@firebase/firestore';
 import { app } from '@/server/firebase';
 import { mapMutations, mapState } from 'vuex';
 
-
+const db = getFirestore(app);
 const auth = getAuth(app);
 
 export default {
@@ -135,6 +136,11 @@ export default {
       this.$router.go(-1);
     },
     async logoutFirebase() {
+
+      await updateDoc(doc(db, "user", this.userData.uid), {
+        notificationId: 'NONE'
+      })  
+
       await signOut(auth);
 
       this.setUserData({});
