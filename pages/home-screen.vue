@@ -160,6 +160,36 @@
       >
         <h1>Tab 3</h1>
       </v-window-item>
+      <v-window-item value="3" class="profile"
+      >
+        <div class="cover-photo"></div>
+        <div class="text-center mt-n12">
+            <v-avatar size="100" class="primary--text" style="border: 2px solid">
+                <v-img :src="`https://api.dicebear.com/6.x/fun-emoji/svg?seed=${userData.uid}&mouth=cute,wideSmile,faceMask,kissHeart,lilSmile,plain,smileLol,smileTeeth&eyes=closed,cute,love,plain,shades,stars,wink,wink2`"></v-img>
+            </v-avatar>
+            <h2 class="my-3">{{ userData.first_name }} {{ userData.middle_name && `${userData.middle_name[0]}.` }} {{ userData.last_name }}</h2>
+            <p class="grey--text text--darken-2">
+                <span>{{ userData.bio || 'Add Bio' }}</span> 
+                <v-btn icon color="primary" class="mr-n7">
+                    <v-icon>mdi-pencil</v-icon>
+                </v-btn>
+            </p>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+                            <h2>Male</h2>
+                            <h5>Gender</h5>
+                        </td>
+                        <td>
+                            <h2>Patient</h2>
+                            <h5>Type</h5>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+      </v-window-item>
     </v-window>
 </app-bar>
 </template>
@@ -170,6 +200,7 @@ h1 {
     text-align: center;
     margin: 20px 0;
     margin-bottom: 20px;
+    font-weight: bold;
 }
 
 .selections {
@@ -218,6 +249,30 @@ h1 {
         font-weight: normal;
         font-size: 14px;
         opacity: 0.8;
+    }
+}
+
+.profile {
+    .cover-photo {
+        padding: 10px;
+        height: 200px;
+        background-color: rgb(228, 228, 228);
+        border-radius: 20px;
+    }
+
+    table {
+        text-align: center;
+        // border: 1px solid red;
+        margin: auto;
+
+        td {
+            padding: 20px 30px;
+            text-align: center;
+        }
+
+        td:not(:last-child) {
+            border-right: 1px solid rgb(205, 205, 205);
+        }
     }
 }
 </style>

@@ -42,7 +42,7 @@
                     :prepend-inner-icon="moodSelected.icon"
                     outlined
                     :color="moodSelected.color"
-                    :placeholder="`Tell me the reason why  you're ${moodSelected?.mood.toLowerCase()}`"
+                    :placeholder="`Tell me the reason why you're ${moodSelected?.mood.toLowerCase()}`"
                     height="250"
                 ></v-textarea>
 
