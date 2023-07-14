@@ -50,6 +50,8 @@ function onDeviceReady() {
 
   console.log("DEVICE READY IS READY AND TRIGGERED");
 
+  console.log(cordova.plugins.notification.local.launchDetails);
+
   cordova.plugins.backgroundMode.enable();
 
   // Cordova plugin PUSH
@@ -83,12 +85,14 @@ function onDeviceReady() {
     let notificationSetup = {
       title: data.title,
       text: data.message,
+      data: data.additionalData || undefined,
+      icon: data.image || undefined,
     };
 
     if (data.additionalData.button) {
       notificationSetup["actions"] = [
         {
-          id: data.additionalData.button?.toLowerCase().replace(" ", "-"),
+          id: data.additionalData.button?.toLowerCase().replace(" ", "_"),
           title: data.additionalData.button,
         },
       ];
@@ -102,4 +106,13 @@ function onDeviceReady() {
   window.push.on("error", (e) => {
     // e.message
   });
+
+
+
+
+
+  // CORDOVA NOTIFICATION ON CLICK EVENT
+  cordova.plugins.notification.local.on('click', data => {
+    console.log(data);
+  }, );
 }

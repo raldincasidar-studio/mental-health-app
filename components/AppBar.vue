@@ -97,10 +97,11 @@
             <v-icon>mdi-home</v-icon>
         </v-btn>
 
-        <v-btn value="1">
-            <span>History</span>
 
-            <v-icon>mdi-chart-timeline-variant</v-icon>
+        <v-btn value="1">
+            <span>My Profile</span>
+
+            <v-icon>mdi-account</v-icon>
         </v-btn>
 
 
@@ -108,12 +109,6 @@
             <span>Medical</span>
 
             <v-icon>mdi-medical-bag</v-icon>
-        </v-btn>
-
-        <v-btn value="3">
-            <span>My Profile</span>
-
-            <v-icon>mdi-account</v-icon>
         </v-btn>
         </v-bottom-navigation>
     </div>
@@ -141,11 +136,12 @@ export default {
         notificationId: 'NONE'
       })  
 
+      
+      this.$router.replace('/main-screen');
+
       await signOut(auth);
 
       this.setUserData({});
-      
-      this.$router.replace('/main-screen');
     }
   },
   computed: {

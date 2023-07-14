@@ -3,14 +3,16 @@
         <div class="container">
             <h1 class="mb-10">Are you a Patient or a Guardian?</h1>
 
-            <v-card class="text-center pa-3 py-10 my-5 border-3-transparent rounded-lg hidden-border" :class="{'selected': userType == 'Patient'}" @click="userType = 'Patient'">
-                <v-icon :color="userType == 'Patient' ? 'primary' : 'grey lighten-1'" size="100">mdi-account</v-icon>
-                <h4>I'm a Patient</h4>
-            </v-card>
-            <v-card class="text-center pa-3 py-10 my-5 border-3-transparent rounded-lg hidden-border" :class="{'selected': userType == 'Doctor'}" @click="userType = 'Doctor'">
-                <v-icon :color="userType == 'Guardian' ? 'primary' : 'grey lighten-1'" size="100">mdi-doctor</v-icon>
-                <h4>I'm a Doctor</h4>
-            </v-card>
+            <div class="d-flex gap-2">
+                <v-card style="flex: 1" class="text-center pa-3 py-10 mx-2 border-3-transparent rounded-lg hidden-border" :class="{'selected': userType == 'Patient'}" @click="userType = 'Patient'">
+                    <v-icon :color="userType == 'Patient' ? 'primary' : 'grey lighten-1'" size="60">mdi-account</v-icon>
+                    <h4>I'm a Patient</h4>
+                </v-card>
+                <v-card style="flex: 1" class="text-center pa-3 py-10 mx-2 border-3-transparent rounded-lg hidden-border" :class="{'selected': userType == 'Doctor'}" @click="userType = 'Doctor'">
+                    <v-icon :color="userType == 'Guardian' ? 'primary' : 'grey lighten-1'" size="60">mdi-doctor</v-icon>
+                    <h4>I'm a Doctor</h4>
+                </v-card>
+            </div>
             <v-btn color="primary" :disabled="!userType" block x-large append-icon="mdi-vuetify" class="mt-10" @click="proceed()">
                 NEXT
                 <v-icon

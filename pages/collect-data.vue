@@ -16,6 +16,17 @@
             <v-btn icon large class="mr-n7" @click="cancel()" :disabled="isLoading" v-if="needToSignup || needToLogin"><v-icon color="red">mdi-close</v-icon></v-btn>
         </p>
 
+        <div class="d-flex gap-2 userType my-10" v-if="needToSignup">
+            <v-card style="flex: 1" class="text-center pa-3 py-10 mr-4 border-3-transparent rounded-lg hidden-border" :class="{'selected': userType == 'Patient'}" @click="userType = 'Patient'">
+                <v-icon :color="userType == 'Patient' ? 'primary' : 'grey lighten-1'" size="60">mdi-account</v-icon>
+                <h4>I'm a Patient</h4>
+            </v-card>
+            <v-card style="flex: 1" class="text-center pa-3 py-10 border-3-transparent rounded-lg hidden-border" :class="{'selected': userType == 'Doctor'}" @click="userType = 'Doctor'">
+                <v-icon :color="userType == 'Guardian' ? 'primary' : 'grey lighten-1'" size="60">mdi-doctor</v-icon>
+                <h4>I'm a Doctor</h4>
+            </v-card>
+        </div>
+
         <v-text-field v-model="email" v-if="!needToSignup && !needToLogin" label="Email" append-icon="mdi-email" filled large class="my-1"></v-text-field>
         <v-text-field v-if="needToSignup" v-model="first_name" label="First Name" filled large class="my-1"></v-text-field>
         <v-text-field v-if="needToSignup" v-model="middle_name" label="Middle Name" filled large class="my-1"></v-text-field>
@@ -81,6 +92,17 @@
         font-size: 22px;
         color: #222222;
     }
+
+    .userType {
+        .hidden-border {
+            border: 3px solid transparent;
+            transition: border .2s linear;
+        }
+
+        .selected {
+            border: 3px solid #45B3E0;
+        }
+    }
 </style>
 
 <script>
@@ -100,6 +122,7 @@ export default {
             first_name: '',
             middle_name: '',
             last_name: '',
+            userType: '',
             date_of_birth: '',
             gender: '',
             address: '',
@@ -191,7 +214,7 @@ export default {
                     gender: this.gender,
                     address: this.address,
                     phone_number: this.phone_number,
-                    userType: this.userTypeSelected,
+                    userType: this.userType,
                     
                     // Add the notificationId
                     notificationId: window.notificationRegistrationId || 'NONE'

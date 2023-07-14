@@ -1,11 +1,11 @@
 <template>
 <app-bar>
 
-    <v-window :value="currentHomePage" height="100%" :swipeable="false">
+    <v-window :value="currentHomePage" height="100%" touchless>
       <v-window-item value="0"
       >
         
-        <div class="container">
+        <div class="container" v-if="userData.userType == 'Patient'">
             <div class="mb-4">
             <v-skeleton-loader type="image" v-if="posters.length < 1"></v-skeleton-loader>
             <v-card v-else background-color="grey-lighten-3">
@@ -98,96 +98,169 @@
                 </v-window-item>
             </v-window>
         </div>
+
+        <div class="container" v-else>
+            <div class="py-2">
+                <h3>
+                    Top Patients
+                    <v-btn icon>
+                        <v-icon color="primary">mdi-arrow-right</v-icon>
+                    </v-btn>
+                </h3>
+                <div class="d-flex mt-5 py-2" style="overflow-x: scroll">
+                    <v-card class="py-3 px-3 rounded-lg elevation-4 margined" :class="{'gradient-violet': i === 1}" style="flex: 0 0 50%" dark v-for="i in 5" :key="i">
+                        <v-btn icon large class="float-right">
+                            <v-icon>mdi-account-arrow-left</v-icon>
+                        </v-btn>
+                        <div class="pa-3">
+                            <v-avatar size="60" class="my-4 mt-5">
+                                <v-img src="https://picsum.photos/seed/${userData.uid}/768/432"></v-img>
+                            </v-avatar>
+                            <h4 class="text--white">Raldin <br>Disomimba</h4>
+                            <v-btn pill elevation="0" color="white" class="mt-5" block large light rounded>
+                                <v-icon left>mdi-facebook-messenger</v-icon>
+                                Message
+                            </v-btn>
+                        </div>
+                    </v-card>
+                </div>
+            </div>
+        </div>
       </v-window-item>
-      <v-window-item value="1"
+      <v-window-item value="1" class="profile"
       >
 
-        <div class="calendar-container">
-            <v-date-picker
-                v-model="picker"
-                color="primary"
-                full-width
-                no-title
-                :events="getDiariesDate"
-                :event-color="colorDate"
-                @change="viewRant"
-            ></v-date-picker>
+        <v-img :src="`https://picsum.photos/seed/${userData.uid}/768/432`" lazy-src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mN89h8AAtEB5wrzxXEAAAAASUVORK5CYII=" :aspect-ratio="16/9" class="rounded-lg"></v-img>
+        <div class="text-center mt-n12">
+            <v-avatar size="150" class="white--text" style="border: 5px solid">
+                <v-img style="background-color: rgb(224, 224, 224)" :src="`https://api.dicebear.com/6.x/fun-emoji/svg?seed=${userData.uid}&mouth=cute,wideSmile,faceMask,kissHeart,lilSmile,plain,smileLol,smileTeeth&eyes=closed,cute,love,plain,shades,stars,wink,wink2`"></v-img>
+            </v-avatar>
+            <h2 class="my-3 mb-0">{{ userData.first_name }} {{ userData.middle_name && `${userData.middle_name[0]}.` }} {{ userData.last_name }}</h2>
+            <p class="text-center ma-0">
+                <v-chip
+                    class="ma-2 mb-5"
+                    :color="userData.userType === 'Doctor' ? 'pink' : 'primary'"
+                    text-color="white"
+                    >
+                    <v-icon left>
+                        {{ userData.userType === 'Doctor' ? 'mdi-doctor' : 'mdi-account-heart' }}
+                    </v-icon>
+                    {{ userData.userType }}
+                </v-chip>
+            </p>
+            <p class="grey--text text--darken-2">
+                {{ userData.gender }} | {{ moment().diff(userData.date_of_birth, 'year') }} years old
+            </p>
+            <div class="text-center mb-12">
+                <v-btn style="width: calc(100% - 100px - 16px)" elevation="0" color="primary" large class="rounded-lg mx-2">
+                    <v-icon left>mdi-facebook-messenger</v-icon>
+                    View Messages
+                </v-btn>
+                <v-btn large elevation="0" color="grey lighten-3" class="rounded-lg mx-2">
+                    <v-icon>mdi-share-variant</v-icon>
+                </v-btn>
+            </div>
         </div>
 
-        
-        <h1>Test History</h1>
-
-        <div v-if="test_results == 'EMPTY'" class="text-center">
-            <v-icon class="ma-10" size="60">mdi-file-document-outline</v-icon>
-            <h2 style="font-weight: normal">You have no Tests yet</h2>
-            <v-btn color="primary" class="mt-10" text large>
-                <v-icon left>mdi-plus</v-icon>
-                Take Test
+        <div v-if="userData.userType === 'Patient'">
+            
+            <div class="calendar-container">
+                <v-date-picker
+                    v-model="picker"
+                    color="primary"
+                    full-width
+                    no-title
+                    :events="getDiariesDate"
+                    :event-color="colorDate"
+                    @change="viewRant"
+                ></v-date-picker>
+            </div>
+            <v-btn link to="/daily-diary" large block class="gradient-violet mb-10" depressed dark  v-if="canStartDailyDiary">
+                <v-icon left>mdi-notebook</v-icon>
+                Start Daily Diary
             </v-btn>
+
+            
+            <h1>Test History</h1>
+
+            <test-history :test_results="test_results"></test-history>
         </div>
-        <div v-else-if="!test_results.length">
-            <v-skeleton-loader type="list-item-avatar-three-line"></v-skeleton-loader>
-            <v-skeleton-loader type="list-item-avatar-three-line"></v-skeleton-loader>
-        </div>
-        <v-list-item
-            v-else
-            v-for="result in test_results"
-            :key="result.title"
-            link
-            :to="`/results/${result.id}`"
-        >
-            <v-list-item-avatar>
-            <v-icon
-                class="primary"
-                dark
-            >mdi-file-document-outline</v-icon>
-            </v-list-item-avatar>
 
-            <v-list-item-content>
-            <v-list-item-title>{{ result.test_name }} Test</v-list-item-title>
+        <table v-else class="mt-n5 mb-12">
+            <tbody>
+                <tr>
+                    <td>
+                        <h2>
+                            <v-icon color="yellow darken-2">mdi-star</v-icon>
+                            <v-icon color="yellow darken-2">mdi-star</v-icon>
+                            <v-icon color="yellow darken-2">mdi-star</v-icon>
+                            <v-icon color="yellow darken-2">mdi-star</v-icon>
+                            <v-icon color="yellow darken-2">mdi-star</v-icon>
+                        </h2>
+                        <h4>
+                            3.5 Star Rating
+                        </h4>
+                    </td>
+                    <td>
+                        <h2>3</h2>
+                        <h5>Patients</h5>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
-            <v-list-item-subtitle>{{ result.result_percentage }}% Possibility · {{ moment(result.date_added.toDate()).fromNow() }}</v-list-item-subtitle>
-            </v-list-item-content>
-
-            <v-list-item-action>
-            <v-btn icon>
-                <v-icon color="grey lighten-1">mdi-file-download</v-icon>
-            </v-btn>
-            </v-list-item-action>
-        </v-list-item>
       </v-window-item>
       <v-window-item value="2"
       >
-        <h1>Tab 3</h1>
-      </v-window-item>
-      <v-window-item value="3" class="profile"
-      >
-        <div class="cover-photo"></div>
-        <div class="text-center mt-n12">
-            <v-avatar size="100" class="primary--text" style="border: 2px solid">
-                <v-img :src="`https://api.dicebear.com/6.x/fun-emoji/svg?seed=${userData.uid}&mouth=cute,wideSmile,faceMask,kissHeart,lilSmile,plain,smileLol,smileTeeth&eyes=closed,cute,love,plain,shades,stars,wink,wink2`"></v-img>
-            </v-avatar>
-            <h2 class="my-3">{{ userData.first_name }} {{ userData.middle_name && `${userData.middle_name[0]}.` }} {{ userData.last_name }}</h2>
-            <p class="grey--text text--darken-2">
-                <span>{{ userData.bio || 'Add Bio' }}</span> 
-                <v-btn icon color="primary" class="mr-n7">
-                    <v-icon>mdi-pencil</v-icon>
+        <div class="container">
+            <h3 class="mb-5">
+                <v-icon color="red" size="30" class="mr-2">mdi-doctor</v-icon>
+                <span v-if="userData.userType === 'Patient'">Top MentalAid Doctor</span>
+                <span v-if="userData.userType === 'Doctor'">MentalAid Patients</span>
+            </h3>
+            
+            <div class="text-center" v-if="doctorsList === 'EMPTY'">
+                <v-img class="my-10 mt-12 mx-auto" max-width="250px" :src="require(`~/assets/img/doctors.svg`)"></v-img>
+                <h4 class="grey--text">No Doctors available at the moment</h4>
+                <p class="grey--text mt-4">Do you know someone?</p>
+                <v-btn color="pink" text outlined class="mt-7">
+                    <v-icon left>mdi-share-variant</v-icon>
+                    Recommend MindfulAid
                 </v-btn>
-            </p>
-            <table>
-                <tbody>
-                    <tr>
-                        <td>
-                            <h2>Male</h2>
-                            <h5>Gender</h5>
-                        </td>
-                        <td>
-                            <h2>Patient</h2>
-                            <h5>Type</h5>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            </div>
+            <div v-else-if="!doctorsList.length">
+                <v-skeleton-loader type="list-item-avatar-three-line"></v-skeleton-loader>
+                <v-skeleton-loader type="list-item-avatar-three-line"></v-skeleton-loader>
+                <v-skeleton-loader type="list-item-avatar-three-line"></v-skeleton-loader>
+                <v-skeleton-loader type="list-item-avatar-three-line"></v-skeleton-loader>
+            </div>
+            <v-list three-line v-else>
+                <v-list-item
+                    :key="i"
+                    v-for="(doctor, i) in doctorsList"
+                    link
+                    :to="`/profile/${doctor.id}`"
+                    class="rounded-lg"
+                    >
+                    <v-list-item-avatar size="60">
+                        <v-img :src="`https://api.dicebear.com/6.x/fun-emoji/svg?seed=${doctor.id}&mouth=cute,wideSmile,faceMask,kissHeart,lilSmile,plain,smileLol,smileTeeth&eyes=closed,cute,love,plain,shades,stars,wink,wink2`"></v-img>
+                    </v-list-item-avatar>
+
+                    <v-list-item-content>
+                        <v-list-item-title class="primary--text" style="font-weight: bold; font-size: 18px;">{{ doctor.first_name }} {{ doctor.middle_name && `${doctor.middle_name[0]}.` }} {{ doctor.last_name }}</v-list-item-title>
+                        <v-list-item-subtitle class="mt-2">
+                            MentalAid 2 months Doctor<br>
+                            <span  v-if="doctor.userType == 'Doctor'" class="ma-0">
+                                <v-icon color="orange" size="23">mdi-star</v-icon>
+                                <v-icon color="orange" size="23">mdi-star</v-icon>
+                                <v-icon color="orange" size="23">mdi-star</v-icon>
+                                <v-icon color="orange" size="23">mdi-star</v-icon>
+                                <v-icon color="orange" size="23">mdi-star</v-icon>
+                            </span>
+                        </v-list-item-subtitle>
+                    </v-list-item-content>
+                </v-list-item>
+            </v-list>
         </div>
       </v-window-item>
     </v-window>
@@ -212,10 +285,29 @@ h1 {
     }
 }
 
+.margined{
+    margin: 0 15px;
+
+    &:nth-child(1) {
+        margin-left: 0;
+    }
+}
+
 .gradient-violet {
     background: #4776E6;  /* fallback for old browsers */
     background: -webkit-linear-gradient(270deg, #4776e6, #45B3E0);  /* Chrome 10-25, Safari 5.1-6 */
     background: linear-gradient(270deg, #4776e6, #45B3E0);
+    background-size: 400% 400%;
+
+    -webkit-animation: MovingGradient 3s ease infinite;
+    -moz-animation: MovingGradient 3s ease infinite;
+    animation: MovingGradient 3s ease infinite;
+}
+
+.gradient-pink {
+    background: #ff0f7b;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(270deg, #ff0f7b, #f89b29);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(270deg, #ff0f7b, #f89b29);
     background-size: 400% 400%;
 
     -webkit-animation: MovingGradient 3s ease infinite;
@@ -311,10 +403,15 @@ export default {
                 // alert('History Page triggered');
 
                 this.initHistoryPage();
+                this.initHomePage();
             }
 
             if (newPage == "0") {
                 this.initHomePage();
+            }
+
+            if (newPage == "2") {
+                this.initMedicalPage()
             }
 
         }
@@ -355,7 +452,24 @@ export default {
 
         },
 
+        initMedicalPage() {
+            this.doctorsList = [];
+
+            getDocs(query(collection(db, 'user'), where('userType', '==', this.userData.userType == 'Doctor' ? 'Patient' : 'Doctor'))).then(results => {
+                results.forEach(doc => {
+                    this.doctorsList.push({id: doc.id, ...doc.data()});
+                });
+
+
+                if (results.size < 1) {
+                    this.doctorsList = "EMPTY";
+                }
+            });
+        },
+
         initHomePage() {
+            this.canStartDailyDiary = false;
+
             getDocs(query(collection(db, 'diary'), where('date_added', '>=', new Date(moment().format('YYYY-MM-DD'))), where('by', '==', this.userData.uid))).then(results => {
                 console.log(results.size);
                 if (results.size < 1) {
@@ -433,7 +547,9 @@ export default {
 
             picker: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
 
-            diaries: ['2023-06-06']
+            diaries: ['2023-06-06'],
+
+            doctorsList: [],
         }
     },
     

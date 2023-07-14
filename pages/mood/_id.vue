@@ -183,7 +183,6 @@ export default {
         const docRef = doc(db, "diary", this.$route.params.id);
         getDoc(docRef).then(docSnap => {
             if (docSnap.exists()) {
-                const questions = docSnap.data().questions;
 
                 this.info = {id: docSnap.id, ...docSnap.data()};
 
@@ -192,13 +191,6 @@ export default {
                     goBack: true,
                     plain: true,
                     hideBottomNav: true
-                });
-
-                questions.forEach(question => {
-                    this.questions.push({
-                        content: question,
-                        answer: null
-                    })
                 });
             } else {
                 // docSnap.data() will be undefined in this case
