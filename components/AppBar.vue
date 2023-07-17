@@ -110,6 +110,11 @@
 
             <v-icon>mdi-medical-bag</v-icon>
         </v-btn>
+        <v-btn to="/messages">
+            <span>Mesasges</span>
+
+            <v-icon>mdi-facebook-messenger</v-icon>
+        </v-btn>
         </v-bottom-navigation>
     </div>
 </template>
@@ -172,9 +177,9 @@ export default {
           to: '/home-screen'
         },
         {
-          icon: 'mdi-chart-bubble',
-          title: 'Settings',
-          to: '/settings'
+          icon: 'mdi-facebook-messenger',
+          title: 'Messages',
+          to: '/messages'
         }
       ],
       miniVariant: false,

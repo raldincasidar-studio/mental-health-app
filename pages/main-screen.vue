@@ -4,7 +4,7 @@
         <h1>MindfulAid</h1>
         <p>Your personal sanctuary for mental well-being. Our intuitive app offers a seamless journey towards a healthier, happier you.</p>
 
-        <v-btn color="primary" block x-large append-icon="mdi-vuetify" to="/signup">
+        <v-btn color="primary" block x-large append-icon="mdi-vuetify" to="/collect-data">
             GET STARTED
             <v-icon
                 right

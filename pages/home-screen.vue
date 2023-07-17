@@ -35,7 +35,7 @@
                     </v-card>
                 </v-col>
                 <v-col cols="4" class="pa-0 m-0">
-                    <v-card class="text-center pa-5 rounded-lg m-0 selections" elevation="0" v-ripple="{ class: `primary--text` }">
+                    <v-card class="text-center pa-5 rounded-lg m-0 selections" elevation="0" @click="setHomePageSelector('2')" v-ripple="{ class: `primary--text` }">
                         <v-icon size="60" color="primary">mdi-doctor</v-icon>
                         <h5 class="mt-2">Find Doctors</h5>
                     </v-card>
@@ -103,21 +103,21 @@
             <div class="py-2">
                 <h3>
                     Top Patients
-                    <v-btn icon>
+                    <v-btn icon to="/messages">
                         <v-icon color="primary">mdi-arrow-right</v-icon>
                     </v-btn>
                 </h3>
                 <div class="d-flex mt-5 py-2" style="overflow-x: scroll">
-                    <v-card class="py-3 px-3 rounded-lg elevation-4 margined" :class="{'gradient-violet': i === 1}" style="flex: 0 0 50%" dark v-for="i in 5" :key="i">
+                    <v-card class="py-3 px-3 rounded-lg elevation-4 margined" :class="{'gradient-violet': i === 0}" style="flex: 0 0 50%" dark v-for="(patient, i) in topPatientsList" :key="getChatInfo(patient).id || getChatInfo(patient).uid">
                         <v-btn icon large class="float-right">
                             <v-icon>mdi-account-arrow-left</v-icon>
                         </v-btn>
                         <div class="pa-3">
                             <v-avatar size="60" class="my-4 mt-5">
-                                <v-img src="https://picsum.photos/seed/${userData.uid}/768/432"></v-img>
+                                <v-img style="background-color: rgb(224, 224, 224)" :src="getChatInfo(patient).id || getChatInfo(patient).uid ? `https://api.dicebear.com/6.x/fun-emoji/svg?seed=${getChatInfo(patient).id || getChatInfo(patient).uid}&mouth=cute,wideSmile,faceMask,kissHeart,lilSmile,plain,smileLol,smileTeeth&eyes=closed,cute,love,plain,shades,stars,wink,wink2` : `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mN89h8AAtEB5wrzxXEAAAAASUVORK5CYII=`"></v-img>
                             </v-avatar>
-                            <h4 class="text--white">Raldin <br>Disomimba</h4>
-                            <v-btn pill elevation="0" color="white" class="mt-5" block large light rounded>
+                            <h4 class="text--white">{{ getChatInfo(patient).first_name }} <br>{{ getChatInfo(patient).last_name }}</h4>
+                            <v-btn :to="`/messages/${getChatInfo(patient).id || getChatInfo(patient).uid}`" pill elevation="0" color="white" class="mt-5" block large light rounded>
                                 <v-icon left>mdi-facebook-messenger</v-icon>
                                 Message
                             </v-btn>
@@ -152,7 +152,7 @@
                 {{ userData.gender }} | {{ moment().diff(userData.date_of_birth, 'year') }} years old
             </p>
             <div class="text-center mb-12">
-                <v-btn style="width: calc(100% - 100px - 16px)" elevation="0" color="primary" large class="rounded-lg mx-2">
+                <v-btn to="/messages" style="width: calc(100% - 100px - 16px)" elevation="0" color="primary" large class="rounded-lg mx-2">
                     <v-icon left>mdi-facebook-messenger</v-icon>
                     View Messages
                 </v-btn>
@@ -420,6 +420,11 @@ export default {
     methods: {
         ...mapMutations('permaData', ['setNavbarConfig', 'setHomePageSelector']),
 
+        getChatInfo(chat) {
+
+            return chat.participantsInfo.filter(user => user.uid !== this.userData.uid && user.id !== this.userData.uid )[0];
+        },
+
         testingNotif() {
             cordova.plugins.notification.local.schedule({
                 id: 1,
@@ -476,6 +481,23 @@ export default {
                     this.canStartDailyDiary = true;
                 }
             });
+
+            if (this.userData.userType === 'Doctor') {
+
+                this.topPatientsList = [];
+
+                getDocs( query(collection(db, "messages"), where('participants', "array-contains", this.userData.uid), orderBy('date', 'desc'), limit(5)) ).then(results => {
+                results.forEach(doc => {
+                    this.topPatientsList.push({id: doc.id, ...doc.data()});
+                });
+
+
+                if (results.size < 1) {
+                    this.topPatientsList = "EMPTY";
+                }
+            });
+
+            }
         },
 
         initHistoryPage() {
@@ -550,6 +572,8 @@ export default {
             diaries: ['2023-06-06'],
 
             doctorsList: [],
+
+            topPatientsList: [],
         }
     },
     

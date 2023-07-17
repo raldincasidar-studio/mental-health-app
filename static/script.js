@@ -31,7 +31,7 @@ window.parent.sendNotif = (to, title, message) => {
   })
     .then((response) => {
       if (response.ok) {
-        console.log("Notification sent successfully!");
+        console.log("Notification sent successfully!", to, title, message);
       } else {
         console.error(
           "Failed to send notification:",
@@ -85,18 +85,7 @@ function onDeviceReady() {
     let notificationSetup = {
       title: data.title,
       text: data.message,
-      data: data.additionalData || undefined,
-      icon: data.image || undefined,
     };
-
-    if (data.additionalData.button) {
-      notificationSetup["actions"] = [
-        {
-          id: data.additionalData.button?.toLowerCase().replace(" ", "_"),
-          title: data.additionalData.button,
-        },
-      ];
-    }
 
     console.log(notificationSetup);
 
@@ -107,12 +96,9 @@ function onDeviceReady() {
     // e.message
   });
 
-
-
-
-
   // CORDOVA NOTIFICATION ON CLICK EVENT
-  cordova.plugins.notification.local.on('click', data => {
-    console.log(data);
-  }, );
+  cordova.plugins.notification.local.on("click", () => {
+    // console.log(data);
+    return true;
+  });
 }

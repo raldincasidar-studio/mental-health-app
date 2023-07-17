@@ -47,14 +47,19 @@
                                 no-title
                                 :events="getDiariesDate"
                                 :event-color="colorDate"
-                                @change="viewRant"
                             ></v-date-picker>
                         </div>
 
                         
                         <h1>Test History</h1>
 
-                        <test-history :test_results="test_results" :me="user.first_name"></test-history>
+                        <div class="request-access text-center my-12 px-3" v-if="!user?.allowAccess?.includes(this.userData.uid)">
+                            <v-icon size="70" class="my-2">mdi-shield-lock</v-icon>
+                            <h3 class="my-2">Access is locked!</h3>
+                            <p class="my-2 grey--text">Send request access to {{ user.first_name }} to access the test results</p>
+                            <v-btn outlined class="mt-5" @click="sendRequestAccess()" :disabled="requestAccessLoading" :loading="requestAccessLoading">Request Access</v-btn>
+                        </div>
+                        <test-history v-else :test_results="test_results" :me="user.first_name"></test-history>
                     </div>
 
                     <table v-else class="mt-n5 mb-12">
@@ -121,7 +126,7 @@
 </style>
 
 <script>
-import { collection, getDocs, getDoc, getFirestore, limit, orderBy, query, where, doc } from '@firebase/firestore';
+import { collection, getDocs, getDoc, getFirestore, setDoc, limit, orderBy, query, updateDoc, where, doc, serverTimestamp, addDoc } from '@firebase/firestore';
 import { mapMutations, mapState } from 'vuex';
 import { app } from '@/server/firebase';
 import moment  from 'moment';
@@ -133,6 +138,77 @@ export default {
     methods: {
         ...mapMutations('permaData', ['setNavbarConfig']),
 
+
+        async sendRequestAccess() {
+
+            this.requestAccessLoading = true;
+
+            const postData = {
+                type: 'request_permission', 
+                content: {
+                    doctorInfo: this.userData
+                },
+                date: serverTimestamp(),
+                sentBy: this.userData.uid,
+                for: this.user.id,
+            }
+
+            // Get the user id of both
+            const userIds = [this.userData.uid,  this.user.id].sort().join('-');
+
+
+
+            const messageId = doc(db, "messages", userIds);
+
+            const docSnap = await getDoc(messageId)
+
+            if (docSnap.exists()) {
+                // Update document data
+                updateDoc(messageId, {
+                    participants: [this.userData.uid,  this.user.id],
+                    participantsInfo: [this.userData,  this.user],
+                    latestMessage: postData,
+                    date: postData.date,
+                    seenBy: [this.userData.uid],
+                })
+            } else {
+                // docSnap.data() will be undefined in this case
+                // Update document data
+                setDoc(messageId, {
+                    participants: [this.userData.uid, this.user.id],
+                    participantsInfo: [this.userData, this.user],
+                    latestMessage: postData,
+                    date: postData.date,
+                    seenBy: [this.userData.uid],
+                })
+            }
+
+            // Step 2: Access the subcollection
+            const subcollectionRef = collection(messageId, "messages");
+
+            // Step 3: Add a new document to the subcollection using the addDoc function
+            const docRef = await addDoc(subcollectionRef, postData);
+            // console.log("New post added with ID: ", docRef.id);
+
+            this.requestAccessLoading = false;
+
+            this.$swal.fire({
+                toast: true,
+                position: 'bottom',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                icon: 'success',
+                title: `Successfuly sent to ${ this.user.first_name}`,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', this.$swal.stopTimer)
+                    toast.addEventListener('mouseleave', this.$swal.resumeTimer)
+                }
+            });
+
+
+            window.parent.sendNotif(this.user.notificationId, `${this.user.first_name} ${this.user.middle_name && this.user.middle_name[0] + `.`} ${this.user.last_name}:`, `${this.user.first_name} requested access to your test results`);
+        },
 
         viewRant(date) {
 
@@ -168,6 +244,7 @@ export default {
             user: {},
             diaries: [],
             test_results: [],
+            requestAccessLoading: false,
         }
     },
     mounted() {

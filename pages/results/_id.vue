@@ -21,9 +21,30 @@
                     <v-btn large elevation="0" color="primary">
                         Save
                     </v-btn>
-                    <v-btn large outlined color="grey">
-                        <v-icon>mdi-share</v-icon>
-                    </v-btn>
+                    <v-dialog v-model="share_dialog">
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-btn large outlined color="grey" v-bind="attrs" v-on="on">
+                                <v-icon>mdi-share</v-icon>
+                            </v-btn>
+                        </template>
+                        <v-card class="pa-4">
+                            <h4 class="grey--text" style="font-weight: lighter">Share to: </h4>
+                            <v-divider class="my-4"></v-divider>
+                            <v-list-item v-for="(chat, i) in chatList" :key="chat.id">
+                                <v-list-item-avatar>
+                                    <v-img :src="`https://api.dicebear.com/6.x/fun-emoji/svg?seed=${getChatInfo(chat).id || getChatInfo(chat).uid}&mouth=cute,wideSmile,faceMask,kissHeart,lilSmile,plain,smileLol,smileTeeth&eyes=closed,cute,love,plain,shades,stars,wink,wink2`" lazy-src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mN89h8AAtEB5wrzxXEAAAAASUVORK5CYII="></v-img>
+                                </v-list-item-avatar>
+                                <v-list-item-content>
+                                    {{ getChatInfo(chat).first_name }} {{ getChatInfo(chat).middle_name && `${getChatInfo(chat).middle_name[0]}.` }} {{ getChatInfo(chat).last_name }}
+                                </v-list-item-content>
+                                <v-list-item-action>
+                                    <v-btn icon color="primary" @click="forwardTestResult(chat)">
+                                        <v-icon>mdi-share</v-icon>
+                                    </v-btn>
+                                </v-list-item-action>
+                            </v-list-item>
+                        </v-card>
+                    </v-dialog>
                 </div>
 
                 <v-divider class="my-5"></v-divider>
@@ -110,7 +131,7 @@ table {
 </style>
 
 <script>
-import { doc, getDoc, getFirestore } from '@firebase/firestore';
+import { doc, getDoc, addDoc, getFirestore, getDocs, query, where, orderBy, collection, serverTimestamp, setDoc, updateDoc } from '@firebase/firestore';
 import { mapMutations, mapState } from 'vuex';
 import { app } from '@/server/firebase';
 import moment  from 'moment';
@@ -123,11 +144,80 @@ export default {
         return {
             result: {},
             moment: moment,
+            share_dialog: false,
+            chatList: [],
         }
     },
 
     methods: {
         ...mapMutations('permaData', ['setNavbarConfig']),
+
+        forwardTestResult(user) {
+
+            const postData = {
+                type: 'test_result', 
+                content: this.result,
+                date: serverTimestamp(),
+                sentBy: this.userData.uid,
+                for: this.getChatInfo(user).uid || this.getChatInfo(user).id,
+            }
+
+            // Get the user id of both
+            const userIds = [this.userData.uid, (this.getChatInfo(user).uid || this.getChatInfo(user).id)].sort().join('-');
+
+
+
+            const messageId = doc(db, "messages", userIds);
+
+            getDoc(messageId).then( docSnap => {
+                if (docSnap.exists()) {
+                    // Update document data
+                    updateDoc(messageId, {
+                        participants: [this.userData.uid, (this.getChatInfo(user).uid || this.getChatInfo(user).id)],
+                        participantsInfo: [this.userData, this.getChatInfo(user)],
+                        latestMessage: postData,
+                        date: postData.date,
+                        seenBy: [this.userData.uid],
+                    })
+                } else {
+                    // docSnap.data() will be undefined in this case
+                    // Update document data
+                    setDoc(messageId, {
+                        participants: [this.userData.uid, (this.getChatInfo(user).uid || this.getChatInfo(user).id)],
+                        participantsInfo: [this.userData, this.getChatInfo(user)],
+                        latestMessage: postData,
+                        date: postData.date,
+                        seenBy: [this.userData.uid],
+                    })
+                }
+            } )
+
+            // Step 2: Access the subcollection
+            const subcollectionRef = collection(messageId, "messages");
+
+            // Step 3: Add a new document to the subcollection using the addDoc function
+            const docRef = addDoc(subcollectionRef, postData);
+            // console.log("New post added with ID: ", docRef.id);
+
+            this.share_dialog = false;
+
+            this.$swal.fire({
+                toast: true,
+                position: 'bottom',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                icon: 'success',
+                title: `Successfuly sent to ${this.getChatInfo(user).first_name}`,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            window.parent.sendNotif(this.getChatInfo(user).notificationId, `${this.getChatInfo(user).first_name} ${this.getChatInfo(user).middle_name && this.getChatInfo(user).middle_name[0] + `.`} ${this.getChatInfo(user).last_name}`, `${this.getChatInfo(user).first_name} sent you a message`);
+
+        },
 
         scoreToDescription(score) {
 
@@ -142,6 +232,11 @@ export default {
 
             return scoreDescriptions[score];
 
+        },
+
+        getChatInfo(chat) {
+
+            return chat.participantsInfo.filter(user => user.uid !== this.userData.uid && user.id !== this.userData.uid )[0];
         },
 
         scoreToColor(score) {
@@ -175,6 +270,27 @@ export default {
             hideBottomNav: true
         });
 
+        
+        // Get all chatlists
+        getDocs(query(collection(db, "messages"), where('participants', "array-contains", this.userData.uid), orderBy('date', 'desc'))).then(result => {
+        
+            console.log(this.chatList);
+
+            const chats = [];
+
+            for (const key in result.docs) {
+                if (Object.hasOwnProperty.call(result.docs, key)) {
+                    const doc = result.docs[key];
+                    chats.push({id: doc.id, ...doc.data()});
+
+                    console.log(this.chatList);
+                }
+            }
+
+            this.chatList = chats;
+
+        })
+
         const docRef = doc(db, "test_results", this.$route.params.id);
         getDoc(docRef).then(docSnap => {
             if (docSnap.exists()) {
@@ -194,6 +310,7 @@ export default {
                 this.$router.replace('/home-screen');
             }
         })
+
     }
 }
 </script>

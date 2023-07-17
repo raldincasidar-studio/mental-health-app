@@ -74,7 +74,7 @@
                             {{ info.description }}
                         </span>
                     </p>
-                    <v-btn block color="primary" x-large class="mt-10 mb-2" @click="page='1'">
+                    <v-btn block color="primary" x-large class="mt-10 mb-2" to="/home-screen">
                         <v-icon left>mdi-doctor</v-icon>
                         Consult a Doctor
                     </v-btn>
