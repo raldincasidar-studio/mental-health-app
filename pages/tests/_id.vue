@@ -39,7 +39,18 @@
                 <div class="pa-3 end-test">
                     <v-responsive :aspect-ratio="3/2" class="test-image d-flex align-center px-5" :style="{border: `2px solid ${scoreToColor(test_score_percentage)}`}">
                         <h5 :style="{color: scoreToColor(test_score_percentage)}">Test Result</h5>
-                        <h4 :style="{color: scoreToColor(test_score_percentage)}">{{ test_score_percentage }}% Positive</h4>
+                        <h4 v-if="test_score_percentage <= 25">
+                            Low
+                        </h4>
+                        <h4 v-else-if="test_score_percentage <= 50">
+                            Mild
+                        </h4>
+                        <h4 v-else-if="test_score_percentage <= 75">
+                            Moderate
+                        </h4>
+                        <h4 v-else-if="test_score_percentage <= 100">
+                            High
+                        </h4>
                     </v-responsive>
                     <h3 class="text-center mt-10">
                         You have a 
@@ -59,16 +70,16 @@
                     </h3>
                     <p class="mt-10 text-justify">
                         <span v-if="test_score_percentage <= 25">
-                            If your score falls within this range, it indicates a low probability of having the mental disease. This means that based on your responses, the symptoms associated with the disease are less likely to be present.<br>
+                            If your score falls within this range, it indicates a low probability of having the it. This means that based on your responses, the symptoms associated with it are less likely to be present.<br>
                         </span>
                         <span v-else-if="test_score_percentage <= 50">
-                            If your score falls within this range, it suggests a mild probability of the mental disease. This means that there might be some indications of the disease, but further evaluation is needed to have a clearer understanding of your condition.<br>
+                            If your score falls within this range, it suggests a mild probability of the it. This means that there might be some indications of it, but further evaluation is needed to have a clearer understanding of your condition.<br>
                         </span>
                         <span v-else-if="test_score_percentage <= 75">
-                            Falling within this range means that there is a moderate probability of having the mental disease. Your score is relatively higher, indicating a notable presence of symptoms associated with the disease. It's important to consult with a healthcare professional like me to discuss the results in more detail and explore potential treatment options.<br>
+                            Falling within this range means that there is a moderate probability of having the it. Your score is relatively higher, indicating a notable presence of symptoms associated with it. It's important to consult with a healthcare professional like me to discuss the results in more detail and explore potential treatment options.<br>
                         </span>
                         <span v-else-if="test_score_percentage <= 100">
-                            If your score falls within this range, it indicates a high probability of the mental disease. Your score is significantly higher, suggesting a strong likelihood of the presence of symptoms associated with the disease. In this case, it is crucial to seek immediate attention from a healthcare professional like me. We will conduct a more comprehensive evaluation and determine the most appropriate intervention for your situation.
+                            If your score falls within this range, it indicates a high probability of the it. Your score is significantly higher, suggesting a strong likelihood of the presence of symptoms associated with it. In this case, it is crucial to seek immediate attention from a healthcare professional like me. We will conduct a more comprehensive evaluation and determine the most appropriate intervention for your situation.
                         </span>
                         <span v-else>
                             {{ info.description }}
@@ -76,7 +87,7 @@
                     </p>
                     <v-btn block color="primary" x-large class="mt-10 mb-2" to="/home-screen">
                         <v-icon left>mdi-doctor</v-icon>
-                        Consult a Doctor
+                        Consult a Professional
                     </v-btn>
                     <v-btn block text x-large class="mb-3" @click="$router.replace('/tests')">
                         <v-icon left>mdi-refresh</v-icon>

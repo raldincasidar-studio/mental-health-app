@@ -37,7 +37,7 @@
                 <v-col cols="4" class="pa-0 m-0">
                     <v-card class="text-center pa-5 rounded-lg m-0 selections" elevation="0" @click="setHomePageSelector('2')" v-ripple="{ class: `primary--text` }">
                         <v-icon size="60" color="primary">mdi-doctor</v-icon>
-                        <h5 class="mt-2">Find Doctors</h5>
+                        <h5 class="mt-2">Consult Professional</h5>
                     </v-card>
                 </v-col>
                 <v-col cols="12" class="px-5" v-if="canStartDailyDiary">
@@ -107,7 +107,7 @@
                         <v-icon color="primary">mdi-arrow-right</v-icon>
                     </v-btn>
                 </h3>
-                <div class="d-flex mt-5 py-2" style="overflow-x: scroll">
+                <div class="d-flex mt-5 py-2" style="overflow-x: scroll" v-if="topPatientsList !== 'EMPTY'">
                     <v-card class="py-3 px-3 rounded-lg elevation-4 margined" :class="{'gradient-violet': i === 0}" style="flex: 0 0 50%" dark v-for="(patient, i) in topPatientsList" :key="getChatInfo(patient).id || getChatInfo(patient).uid">
                         <v-btn icon large class="float-right">
                             <v-icon>mdi-account-arrow-left</v-icon>
@@ -123,6 +123,10 @@
                             </v-btn>
                         </div>
                     </v-card>
+                </div>
+                <div v-else class="text-center pa-4">
+                    <v-icon color="grey" size="50" class="my-2">mdi-account-remove</v-icon>
+                    <h4 class="grey--text">No patients at the moment</h4>
                 </div>
             </div>
         </div>
@@ -421,7 +425,7 @@ export default {
         ...mapMutations('permaData', ['setNavbarConfig', 'setHomePageSelector']),
 
         getChatInfo(chat) {
-
+            console.log(chat);
             return chat.participantsInfo.filter(user => user.uid !== this.userData.uid && user.id !== this.userData.uid )[0];
         },
 
@@ -487,15 +491,19 @@ export default {
                 this.topPatientsList = [];
 
                 getDocs( query(collection(db, "messages"), where('participants', "array-contains", this.userData.uid), orderBy('date', 'desc'), limit(5)) ).then(results => {
-                results.forEach(doc => {
-                    this.topPatientsList.push({id: doc.id, ...doc.data()});
+                    results.forEach(doc => {
+                        this.topPatientsList.push({id: doc.id, ...doc.data()});
+                    });
+
+
+                    if (results.size < 1) {
+                        this.topPatientsList = "EMPTY";
+                    }
+
+                    console.log(this.topPatientsList);
                 });
 
-
-                if (results.size < 1) {
-                    this.topPatientsList = "EMPTY";
-                }
-            });
+                
 
             }
         },
