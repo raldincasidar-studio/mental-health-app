@@ -149,7 +149,7 @@
                     <v-icon left>
                         {{ userData.userType === 'Doctor' ? 'mdi-doctor' : 'mdi-account-heart' }}
                     </v-icon>
-                    {{ userData.userType }}
+                    {{ userData.userType == 'Patient' ? 'Student' : 'Professional' }}
                 </v-chip>
             </p>
             <p class="grey--text text--darken-2">
@@ -160,8 +160,8 @@
                     <v-icon left>mdi-facebook-messenger</v-icon>
                     View Messages
                 </v-btn>
-                <v-btn large elevation="0" color="grey lighten-3" class="rounded-lg mx-2">
-                    <v-icon>mdi-share-variant</v-icon>
+                <v-btn to="/settings" large elevation="0" color="grey lighten-3" class="rounded-lg mx-2">
+                    <v-icon>mdi-cog</v-icon>
                 </v-btn>
             </div>
         </div>
@@ -219,8 +219,8 @@
         <div class="container">
             <h3 class="mb-5">
                 <v-icon color="red" size="30" class="mr-2">mdi-doctor</v-icon>
-                <span v-if="userData.userType === 'Patient'">Top MentalAid Doctor</span>
-                <span v-if="userData.userType === 'Doctor'">MentalAid Patients</span>
+                <span v-if="userData.userType === 'Patient'">MentalAid Professional</span>
+                <span v-if="userData.userType === 'Doctor'">MentalAid Students</span>
             </h3>
             
             <div class="text-center" v-if="doctorsList === 'EMPTY'">
@@ -252,15 +252,8 @@
 
                     <v-list-item-content>
                         <v-list-item-title class="primary--text" style="font-weight: bold; font-size: 18px;">{{ doctor.first_name }} {{ doctor.middle_name && `${doctor.middle_name[0]}.` }} {{ doctor.last_name }}</v-list-item-title>
-                        <v-list-item-subtitle class="mt-2">
-                            MentalAid 2 months Doctor<br>
-                            <span  v-if="doctor.userType == 'Doctor'" class="ma-0">
-                                <v-icon color="orange" size="23">mdi-star</v-icon>
-                                <v-icon color="orange" size="23">mdi-star</v-icon>
-                                <v-icon color="orange" size="23">mdi-star</v-icon>
-                                <v-icon color="orange" size="23">mdi-star</v-icon>
-                                <v-icon color="orange" size="23">mdi-star</v-icon>
-                            </span>
+                        <v-list-item-subtitle>
+                            MentalAid {{ userData.userType === 'Patient' ? 'Professional' : 'Student' }}
                         </v-list-item-subtitle>
                     </v-list-item-content>
                 </v-list-item>
@@ -423,6 +416,21 @@ export default {
 
     methods: {
         ...mapMutations('permaData', ['setNavbarConfig', 'setHomePageSelector']),
+
+
+        getURLParams(param) {
+
+
+            const currentUrl = window.location.search;
+
+            const urlParams = new URLSearchParams(currentUrl);
+
+            const pageValue = urlParams.get(param);
+
+            return pageValue;
+
+        },
+
 
         getChatInfo(chat) {
             console.log(chat);
@@ -597,24 +605,27 @@ export default {
         this.setHomePageSelector("0");
 
        getDocs(query(collection(db, 'posters'), orderBy('date_added', 'desc'))).then(results => {
-        results.forEach(doc => {
-            this.posters.push(doc.data().img);
-        });
+            results.forEach(doc => {
+                this.posters.push(doc.data().img);
+            });
        }).catch(error => {
-        console.error(error);
+            console.error(error);
        })
 
        getDocs(query(collection(db, 'tests'), orderBy('date_added', 'desc'), limit(3))).then(results => {
-        results.forEach(doc => {
-            this.tests.push({id: doc.id, ...doc.data()});
-        });
-       }).catch(error => {
-        console.error(error);
-       })
+            results.forEach(doc => {
+                this.tests.push({id: doc.id, ...doc.data()});
+            });
+        }).catch(error => {
+            console.error(error);
+        })
 
-       this.initHomePage();
-       this.initHistoryPage();
+        this.initHomePage();
+        this.initHistoryPage();
 
+        if (this.getURLParams('page') === 'professional') {
+            this.setHomePageSelector('2')
+        }
     }
 }
 </script>

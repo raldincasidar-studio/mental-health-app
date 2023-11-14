@@ -5,9 +5,7 @@
 
         <img src="@/assets/img/app-icon.png" class="mt-10 mb-2" alt="App Icon">
         <h2 class="text-primary mb-5">
-            {{ !needToSignup && !needToLogin ? 'Welcome' : '' }}
-            {{ needToLogin ? 'Login' : '' }}
-            {{ needToSignup ? 'Sign Up' : '' }}
+            {{ page == 'login' ? 'Login' : 'Sign Up' }}
             to MindfulAid
         </h2>
         <p class="label mb-10" v-if="needToSignup || needToLogin">
@@ -16,7 +14,7 @@
             <v-btn icon large class="mr-n7" @click="cancel()" :disabled="isLoading" v-if="needToSignup || needToLogin"><v-icon color="red">mdi-close</v-icon></v-btn>
         </p>
 
-        <div class="d-flex gap-2 userType my-10" v-if="needToSignup">
+        <div class="d-flex gap-2 userType my-10" v-if="page == 'signup'">
             <v-card style="flex: 1" class="text-center pa-3 py-10 mr-4 border-3-transparent rounded-lg hidden-border" :class="{'selected': userType == 'Patient'}" @click="userType = 'Patient'">
                 <v-icon :color="userType == 'Patient' ? 'primary' : 'grey lighten-1'" size="60">mdi-account</v-icon>
                 <h4>I'm a Patient</h4>
@@ -27,18 +25,19 @@
             </v-card>
         </div>
 
-        <v-text-field v-model="email" v-if="!needToSignup && !needToLogin" label="Email" append-icon="mdi-email" filled large class="my-1"></v-text-field>
-        <v-text-field v-if="needToSignup" v-model="first_name" label="First Name" filled large class="my-1"></v-text-field>
-        <v-text-field v-if="needToSignup" v-model="middle_name" label="Initial Name" filled large class="my-1"></v-text-field>
-        <v-text-field v-if="needToSignup" v-model="last_name" label="Last Name" filled large class="my-1"></v-text-field>
-        <v-text-field v-if="needToSignup" v-model="date_of_birth" type="date" label="Date of Birth" filled large class="my-1"></v-text-field>
-        <v-select :items="['Male', 'Female', 'Prefer not to say']" v-if="needToSignup" v-model="gender" label="Gender" filled large class="my-1"></v-select>
-        <v-text-field v-if="needToSignup" v-model="address" label="Address" filled large class="my-1"></v-text-field>
-        <v-text-field v-if="needToSignup" v-model="phone_number" label="Phone Number" prefix="+63" filled large class="my-1" maxlength="10"></v-text-field>
-        <v-text-field v-if="needToSignup || needToLogin" v-model="password" label="Password" append-icon="mdi-lock" type="password" filled large class="my-1"></v-text-field>
-        <v-text-field v-if="needToSignup" v-model="confirm_password" label="Confirm Password" append-icon="mdi-lock" type="password" filled large class="my-1"></v-text-field>
+        <v-text-field v-model="email" label="Email" append-icon="mdi-email" filled large class="my-1"></v-text-field>
+        <v-text-field v-if="page == 'signup'" v-model="first_name" label="First Name" filled large class="my-1"></v-text-field>
+        <v-text-field v-if="page == 'signup'" v-model="middle_name" label="Initial Name" filled large class="my-1"></v-text-field>
+        <v-text-field v-if="page == 'signup'" v-model="last_name" label="Last Name" filled large class="my-1"></v-text-field>
+        <v-select v-if="page == 'signup'" v-model="suffix" label="Suffix (Optional)" :items="['', 'Jr', 'Sr', 'II', 'III', 'IV', 'V']" filled large class="my-1"></v-select>
+        <v-text-field v-if="page == 'signup'" v-model="date_of_birth" type="date" label="Date of Birth" filled large class="my-1"></v-text-field>
+        <v-select :items="['Male', 'Female', 'Prefer not to say']" v-if="page == 'signup'" v-model="gender" label="Gender" filled large class="my-1"></v-select>
+        <v-text-field v-if="page == 'signup'" v-model="address" label="Address" filled large class="my-1"></v-text-field>
+        <v-text-field v-if="page == 'signup'" v-model="phone_number" label="Phone Number" prefix="+63" filled large class="my-1" maxlength="10"></v-text-field>
+        <v-text-field v-model="password" label="Password" append-icon="mdi-lock" type="password" filled large class="my-1"></v-text-field>
+        <v-text-field v-if="page == 'signup'" v-model="confirm_password" label="Confirm Password" append-icon="mdi-lock" type="password" filled large class="my-1"></v-text-field>
 
-        <v-alert :type="/^(?=.*[a-z])(?=.*[^a-zA-Z0-9]).{6,}$/.test(password) && password == confirm_password ? 'success' : 'error'" class="text-left" text v-if="needToSignup">
+        <v-alert :type="/^(?=.*[a-z])(?=.*[^a-zA-Z0-9]).{6,}$/.test(password) && password == confirm_password ? 'success' : 'error'" class="text-left" text v-if="page == 'signup'">
             Password must contain atleast: <br>
             <span :class="{'red--text': ! /.*[a-z].*/.test(password), 'green--text': /.*[a-z].*/.test(password)}"><v-icon :class="{'red--text': ! /.*[a-z].*/.test(password), 'green--text': /.*[a-z].*/.test(password)}" class="mr-1">mdi-{{ /.*[a-z].*/.test(password) ? 'check' : 'close' }}</v-icon>1 small character</span> <br>
             <span :class="{'red--text': ! /.*[A-Z].*/.test(password), 'green--text': /.*[A-Z].*/.test(password)}"><v-icon :class="{'red--text': ! /.*[A-Z].*/.test(password), 'green--text': /.*[A-Z].*/.test(password)}" class="mr-1">mdi-{{ /.*[A-Z].*/.test(password) ? 'check' : 'close' }}</v-icon>1 big character</span> <br>
@@ -51,19 +50,7 @@
             type="error"
             v-if="errorCode"
         >{{ errorCode }}</v-alert>
-
-        <v-btn color="primary" :disabled="isLoading" :loading="isLoading" v-if="!needToSignup && !needToLogin" @click="checkEmail()" block x-large class="mt-10" append-icon="mdi-vuetify">
-            Continue
-            <v-icon
-            
-                right
-                dark
-                size="25"
-            >
-                mdi-arrow-right
-            </v-icon>
-        </v-btn>
-        <v-btn color="primary" :disabled="isLoading" :loading="isLoading" v-if="needToLogin" @click="login()" block x-large class="mt-10" append-icon="mdi-vuetify">
+        <v-btn color="primary" :disabled="isLoading" :loading="isLoading" v-if="page == 'login'" @click="login()" block x-large class="mt-10" append-icon="mdi-vuetify">
             Sign In
             <v-icon
                 right
@@ -73,7 +60,7 @@
                 mdi-account
             </v-icon>
         </v-btn>
-        <v-btn color="primary" :disabled="isLoading" :loading="isLoading" v-if="needToSignup" @click="signup()" block x-large class="mt-10" append-icon="mdi-vuetify">
+        <v-btn color="primary" :disabled="isLoading" :loading="isLoading" v-if="page == 'signup'" @click="signup()" block x-large class="mt-10" append-icon="mdi-vuetify">
             Create Account
             <v-icon
                 right
@@ -83,6 +70,8 @@
                 mdi-account-plus
             </v-icon>
         </v-btn>
+        <p class="my-6 grey--text" v-if="page == 'login'">Don't have an account? <a @click="page = 'signup'" href="#!" style="font-weight: bold;">Sign Up</a></p>
+        <p class="my-6 grey--text" v-if="page == 'signup'">Already have an account? <a @click="page = 'login'" href="#!" style="font-weight: bold;">Login</a></p>
         <!-- <v-btn color="transparent" elevation="0" :disabled="isLoading" v-if="needToSignup || needToLogin" @click="cancel()" block large class="mt-2">
             Cancel
         </v-btn> -->
@@ -120,6 +109,7 @@ import { mapMutations, mapState } from 'vuex';
 import { app } from '@/server/firebase';
 import { getFirestore, setDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import moment from 'moment';
 
 const db = getFirestore(app);
 const auth = getAuth();
@@ -132,6 +122,7 @@ export default {
             first_name: '',
             middle_name: '',
             last_name: '',
+            suffix: '',
             userType: '',
             date_of_birth: '',
             gender: '',
@@ -143,6 +134,8 @@ export default {
             needToLogin: false,
             isLoading: false,
             errorCode: '',
+            page: 'login',
+            moment: moment,
         }
     },
 
@@ -202,13 +195,26 @@ export default {
 
             if (! /^(?=.*[a-z])(?=.*[^a-zA-Z0-9]).{6,}$/.test(this.password)) {
                 this.errorCode = 'Please check for errors'
-                this.isLoading = true;
+                this.isLoading = false;
                 return;
             }
 
             if (this.password != this.confirm_password) {
                 this.errorCode = 'Please check for errors'
-                this.isLoading = true;
+                this.isLoading = false;
+                return;
+            }
+
+            if (!this.date_of_birth) {
+                this.errorCode = 'Birthdate is required!'
+                this.isLoading = false;
+                return;
+            }
+
+            const age = this.moment().diff(this.moment(this.moment(this.date_of_birth)), 'years');
+            if (age < 16) {
+                this.errorCode = 'You must be 16 years old to use this app!'
+                this.isLoading = false;
                 return;
             }
 
@@ -235,6 +241,7 @@ export default {
                     first_name: this.first_name,
                     middle_name: this.middle_name,
                     last_name: this.last_name,
+                    suffix: this.suffix,
                     date_of_birth: this.date_of_birth,
                     gender: this.gender,
                     address: this.address,

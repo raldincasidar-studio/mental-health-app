@@ -70,9 +70,13 @@ export default {
           const uid = user.uid;
 
           // SUCCESSFUL SIGNUP, GET USER DATA
-          await updateDoc(doc(db, "user", user.uid), {
-            notificationId: window.notificationRegistrationId || 'NONE'
-          })
+          try {
+            await updateDoc(doc(db, "user", user.uid), {
+              notificationId: window.notificationRegistrationId || 'NONE'
+            })
+          } catch (error) {
+            console.error('Notification failed to register: ', error);
+          }
 
           const userData = await getDoc(doc(db, "user", user.uid));
 

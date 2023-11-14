@@ -22,19 +22,16 @@
                             <v-icon left>
                                 {{ user.userType === 'Doctor' ? 'mdi-doctor' : 'mdi-account-heart' }}
                             </v-icon>
-                            {{ user.userType }}
+                            {{ user.userType == 'Patient' ? 'Student' : 'Professional' }}
                         </v-chip>
                     </p>
                     <p class="grey--text text--darken-2">
                         {{ user.gender }} | {{ moment().diff(user.date_of_birth, 'year') }} years old
                     </p>
                     <div class="text-center mb-12">
-                        <v-btn link :to="`/messages/${user.id}`" style="width: calc(100% - 100px - 16px)" elevation="0" color="primary" large class="rounded-lg mx-2">
+                        <v-btn link :to="`/messages/${user.id}`" style="width: calc(100% - 16px)" elevation="0" color="primary" large class="rounded-lg mx-2">
                             <v-icon left>mdi-facebook-messenger</v-icon>
                             Message
-                        </v-btn>
-                        <v-btn large elevation="0" color="grey lighten-3" class="rounded-lg mx-2">
-                            <v-icon>mdi-share-variant</v-icon>
                         </v-btn>
                     </div>
 
@@ -62,17 +59,11 @@
                         <test-history v-else :test_results="test_results" :me="user.first_name"></test-history>
                     </div>
 
-                    <table v-else class="mt-n5 mb-12">
+                    <table v-else class="mt-n5 mb-12" style="table-layout: fixed; width: 100%">
                         <tbody>
                             <tr>
-                                <td>
-                                    <h2>
-                                        <v-icon color="yellow darken-2">mdi-star</v-icon>
-                                        <v-icon color="yellow darken-2">mdi-star</v-icon>
-                                        <v-icon color="yellow darken-2">mdi-star</v-icon>
-                                        <v-icon color="yellow darken-2">mdi-star</v-icon>
-                                        <v-icon color="yellow darken-2">mdi-star</v-icon>
-                                    </h2>
+                                <td style="width: 100%; max-width: 70%;">
+                                    <h2 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ user.address }}</h2>
                                     <h4>
                                         3.5 Star Rating
                                     </h4>

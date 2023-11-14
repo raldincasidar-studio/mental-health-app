@@ -180,6 +180,11 @@ export default {
           icon: 'mdi-facebook-messenger',
           title: 'Messages',
           to: '/messages'
+        },
+        {
+          icon: 'mdi-cog',
+          title: 'Settings',
+          to: '/settings'
         }
       ],
       miniVariant: false,

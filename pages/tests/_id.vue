@@ -85,7 +85,7 @@
                             {{ info.description }}
                         </span>
                     </p>
-                    <v-btn block color="primary" x-large class="mt-10 mb-2" to="/home-screen">
+                    <v-btn block color="primary" x-large class="mt-10 mb-2" to="/home-screen?page=professional">
                         <v-icon left>mdi-doctor</v-icon>
                         Consult a Professional
                     </v-btn>
