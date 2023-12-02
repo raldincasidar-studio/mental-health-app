@@ -129,6 +129,16 @@
                     <h4 class="grey--text">No patients at the moment</h4>
                 </div>
             </div>
+            <div class="py-2">
+                <h3>
+                    Assessed Students today
+                    <v-btn icon>
+                        <v-icon color="primary">mdi-file-sign</v-icon>
+                    </v-btn>
+                </h3>
+
+                <assessment :test_results="assessments" v-if="assessments"></assessment>
+            </div>
         </div>
       </v-window-item>
       <v-window-item value="1" class="profile"
@@ -188,6 +198,10 @@
             <h1>Test History</h1>
 
             <test-history :test_results="test_results"></test-history>
+
+            <h1>Recent Assessments</h1>
+
+            <assessment :test_results="assessments" :me="userData.first_name"></assessment>
         </div>
 
         <table v-else class="mt-n5 mb-12">
@@ -369,7 +383,7 @@ h1 {
 <script>
 import { mapMutations, mapState } from 'vuex';
 import { app } from '@/server/firebase';
-import { collection, getDocs, getFirestore, limit, orderBy, query, where } from '@firebase/firestore';
+import { collection, getDocs, getFirestore, limit, orderBy, query, where, serverTimestamp } from '@firebase/firestore';
 import moment from 'moment';
 
 const db = getFirestore(app);
@@ -511,9 +525,36 @@ export default {
                     console.log(this.topPatientsList);
                 });
 
-                
+                var startOfToday = new Date(); 
+                startOfToday.setHours(0,0,0,0);
+                var endOfToday = new Date(); 
+                endOfToday.setHours(23,59,59,999);
+
+                // FETCH ASSESSMENTS
+                this.assessments = [];
+                getDocs(query(collection(db, 'assessments'), orderBy('date', 'desc'), where('date', '>=', startOfToday), where('date', '<=', endOfToday), where('from', '==', this.userData.uid))).then(results => {
+                    console.log(results);
+                    results.forEach(doc => {
+                        this.assessments.push({id: doc.id, ...doc.data()});
+                    });
+
+
+                    if (results.size < 1) {
+                        this.assessments = "EMPTY";
+                    }
+                }).catch(error => {
+                    console.error(error);
+                    this.assessments = "EMPTY";
+                })
 
             }
+        },
+
+        getStartOfToday() {
+            const now = new Date()
+            now.setHours(5, 0, 0, 0) // +5 hours for Eastern Time
+            const timestamp = serverTimestamp()
+            return timestamp // ex. 1631246400
         },
 
         initHistoryPage() {
@@ -543,6 +584,27 @@ export default {
             }).catch(error => {
                 console.error(error);
             })
+
+            
+
+            if (this.userData.userType === 'Patient') {
+                // FETCH ASSESSMENTS
+                this.assessments = [];
+                getDocs(query(collection(db, 'assessments'), orderBy('date', 'desc'), where('for', '==', this.userData.uid))).then(results => {
+                    console.log(results);
+                    results.forEach(doc => {
+                        this.assessments.push({id: doc.id, ...doc.data()});
+                    });
+
+
+                    if (results.size < 1) {
+                        this.assessments = "EMPTY";
+                    }
+                }).catch(error => {
+                    console.error(error);
+                    this.assessments = "EMPTY";
+                })
+            }
 
         },
 
@@ -590,11 +652,12 @@ export default {
             doctorsList: [],
 
             topPatientsList: [],
+
+            assessments: [],
         }
     },
     
     mounted() {
-
 
         this.setNavbarConfig({
             title: `Welcome, ${this.userData.first_name}!`,

@@ -53,6 +53,9 @@
 
             <!-- INPUT CONTAINER -->
             <div class="input-container white pa-3 d-flex align-items-center" style="position: fixed; bottom:0; right: 0; left: 0; z-index: 9999">
+                <v-btn @click="addAssessmentReport()" v-if="userData.userType == 'Doctor'" icon color="primary" class="ml-1">
+                    <v-icon>mdi-file-sign</v-icon>
+                </v-btn>
                 <v-text-field outlined dense type="text" hide-details @click="checkScrollToBottom()" ref="inputbox" class="rounded-pill" v-model="messageContent" label="Your message here ..."></v-text-field>
                 <v-btn @click="sendMessage()" :disabled="messageContent.length < 1" icon color="primary" class="ml-1">
                     <v-icon>mdi-arrow-up-bold</v-icon>
@@ -62,10 +65,8 @@
     </app-bar>
 </template>
 
+
 <style lang="scss" scoped>
-
-
-
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s ease;
@@ -190,6 +191,12 @@
 
 </style>
 
+<style>
+.swal2-html-container {
+    margin: 0 !important;
+}
+</style>
+
 <script>
 import { addDoc, arrayUnion, collection, doc, getDoc, getDocs, getFirestore, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { mapMutations, mapState } from 'vuex';
@@ -252,6 +259,56 @@ export default {
     },
 
     methods: {
+
+        async addAssessmentReport() {
+
+            if (!this.user?.allowAccess?.includes(this.userData.uid)) {
+                await this.$swal.fire(
+                'You can\'t assess this student!',
+                `${this.user.first_name} does not grant you to access or add data on ${this.user.gender == 'Male' ? 'his' : 'her'} profile. Go to ${this.user.gender == 'Male' ? 'his' : 'her'} profile and request an access before you can proceed`,
+                'error'
+                );
+                return false;
+            }
+
+            this.$swal.fire({
+                title: `Assessment for ${this.user.first_name}`,
+                input: 'text',
+                inputPlaceholder: 'Enter assessment',
+                showCancelButton: true,
+                confirmButtonText: 'Submit',
+                cancelButtonText: 'Cancel',
+                showLoaderOnConfirm: true,
+                preConfirm: async (assessment) => {
+                    console.log(assessment);
+
+
+                    const docRef = await addDoc(collection(db, "assessments"), {
+                        assessment: assessment,
+                        date: serverTimestamp(),
+                        for: this.user.uid || this.user.id,
+                        for_userdata: this.user,
+                        from: this.userData.uid,
+                        from_userdata: this.userData,
+                    });
+
+                    return assessment;
+
+                }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const assessment = result.value;
+                        // Display the entered information
+                        this.$swal.fire(
+                        'Assessment Submitted!',
+                        ``,
+                        'success'
+                        );
+                    }
+                })
+
+        },
+
 
         async grantPermission(doctor) {
             
@@ -318,7 +375,7 @@ export default {
                 if (this.firstLoad) {
                     setTimeout(() => {
                         this.$vuetify.goTo(999999999999999);
-                        console.log('FIRST LOAD 9999');
+                        // console.log('FIRST LOAD 9999');
                         this.firstLoad = false;
                     }, 500);
                 }
@@ -333,7 +390,7 @@ export default {
                 })
                 
     
-                console.log(this.chats)
+                // console.log(this.chats)
             });
 
             setTimeout(() => {
@@ -346,7 +403,7 @@ export default {
         async scrollToBottom() {
 
             const scrollHeight = document.body.scrollHeight;
-            console.log(scrollHeight)
+            // console.log(scrollHeight)
 
             this.$vuetify.goTo(scrollHeight + 999);
 
@@ -369,7 +426,7 @@ export default {
                 this.showScrollDown = true;
             }
 
-            console.log(this.interval);
+            // console.log(this.interval);
 
         },
 

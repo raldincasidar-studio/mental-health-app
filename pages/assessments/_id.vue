@@ -10,41 +10,22 @@
             <div v-else>
                 
                 <v-avatar size="70">
-                    <v-img :src="`https://api.dicebear.com/6.x/fun-emoji/svg?seed=${result.by}&mouth=cute,wideSmile,faceMask,kissHeart,lilSmile,plain,smileLol,smileTeeth&eyes=closed,cute,love,plain,shades,stars,wink,wink2`"></v-img>
+                    <v-img :src="`https://api.dicebear.com/6.x/fun-emoji/svg?seed=${result.from_userdata.uid}&mouth=cute,wideSmile,faceMask,kissHeart,lilSmile,plain,smileLol,smileTeeth&eyes=closed,cute,love,plain,shades,stars,wink,wink2`"></v-img>
                 </v-avatar>
-                <h3 class="my-5 mb-2">{{ result.first_name }} {{ result.last_name }}</h3>
+                <v-icon color="primary" size="30" class="ma-2">mdi-file-sign</v-icon>
+                <v-avatar size="70">
+                    <v-img :src="`https://api.dicebear.com/6.x/fun-emoji/svg?seed=${result.for_userdata.uid}&mouth=cute,wideSmile,faceMask,kissHeart,lilSmile,plain,smileLol,smileTeeth&eyes=closed,cute,love,plain,shades,stars,wink,wink2`"></v-img>
+                </v-avatar>
+                <h3 class="my-5 mb-2">{{ result.from_userdata.first_name }} {{ result.from_userdata.last_name }}</h3>
                 <p class="mb-5" style="line-height: 30px">
-                    {{ moment(result.date_added?.toDate()).format('MMMM DD, YYYY hh:ss A') }}
+                    Assessment note for: <nuxt-link :to="`/profile/${result.for}`">@{{ result.for_userdata.first_name }} {{ result.for_userdata.last_name }}</nuxt-link>  
+                    {{ moment(result.date?.toDate()).format('MMMM DD, YYYY hh:ss A') }}
                 </p>
 
                 <div class="my-3">
                     <v-btn large elevation="0" color="primary">
                         Save
                     </v-btn>
-                    <v-dialog v-model="share_dialog">
-                        <template v-slot:activator="{ on, attrs }">
-                            <v-btn large outlined color="grey" v-bind="attrs" v-on="on">
-                                <v-icon>mdi-share</v-icon>
-                            </v-btn>
-                        </template>
-                        <v-card class="pa-4">
-                            <h4 class="grey--text" style="font-weight: lighter">Share to: </h4>
-                            <v-divider class="my-4"></v-divider>
-                            <v-list-item v-for="(chat, i) in chatList" :key="chat.id">
-                                <v-list-item-avatar>
-                                    <v-img :src="`https://api.dicebear.com/6.x/fun-emoji/svg?seed=${getChatInfo(chat).id || getChatInfo(chat).uid}&mouth=cute,wideSmile,faceMask,kissHeart,lilSmile,plain,smileLol,smileTeeth&eyes=closed,cute,love,plain,shades,stars,wink,wink2`" lazy-src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mN89h8AAtEB5wrzxXEAAAAASUVORK5CYII="></v-img>
-                                </v-list-item-avatar>
-                                <v-list-item-content>
-                                    {{ getChatInfo(chat).first_name }} {{ getChatInfo(chat).middle_name && `${getChatInfo(chat).middle_name[0]}.` }} {{ getChatInfo(chat).last_name }}
-                                </v-list-item-content>
-                                <v-list-item-action>
-                                    <v-btn icon color="primary" @click="forwardTestResult(chat)">
-                                        <v-icon>mdi-share</v-icon>
-                                    </v-btn>
-                                </v-list-item-action>
-                            </v-list-item>
-                        </v-card>
-                    </v-dialog>
                 </div>
 
                 <v-divider class="my-5"></v-divider>
@@ -54,60 +35,11 @@
                     <p class="my-3">{{ result.test_description }}</p>
                 </div>
 
-                <table>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <h2>{{result.result}}</h2>
-                                <h5>Result</h5>
-                            </td>
-                            <td>
-                                <h2 :class="`${scoreToColor(result.result_percentage)}--text`" v-if="result.result <= 4">
-                                    Minimal
-                                </h2>
-                                <h2 :class="`${scoreToColor(result.result_percentage)}--text`" v-else-if="result.result <= 9">
-                                    Mild
-                                </h2>
-                                <h2 :class="`${scoreToColor(result.result_percentage)}--text`" v-else-if="result.result <= 14">
-                                    Moderate
-                                </h2>
-                                <h2 :class="`${scoreToColor(result.result_percentage)}--text`" v-else-if="result.result > 14">
-                                    Severe
-                                </h2>
-                                <h5>Interpretation</h5>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-
                 <v-divider class="my-5"></v-divider>
 
-                <h4 class="my-5">Test Prompts ({{ result.answers?.length }} items)</h4>
+                <h4 class="my-5">Assessment Note:</h4>
 
-                <v-list
-                    subheader
-                    two-line
-                    class="text-left"
-                >
-
-                    <v-list-item 
-                        v-for="(question, i) in result.answers"
-                        :key="i"
-                    >
-                        <v-list-item-avatar>
-                            <v-avatar color="primary" dark>
-                                <span class="white--text">{{ i + 1 }}</span>
-                            </v-avatar>
-                        </v-list-item-avatar>
-
-                        <v-list-item-content>
-                        <v-list-item-title style="overflow: visible;text-wrap: wrap;">{{ question.content }}</v-list-item-title>
-
-                        <v-list-item-subtitle style="font-weight: bold; margin-top: 10px"> {{ question.answer }} - {{ scoreToDescription(question.answer) }}</v-list-item-subtitle>
-                        </v-list-item-content>
-
-                    </v-list-item>
-                </v-list>
+                <p style="font-size: 20px" class="grey--text text--darken-2">{{ result.assessment }}</p>
             </div>
         </div>
     </app-bar>
@@ -289,7 +221,7 @@ export default {
 
         })
 
-        const docRef = doc(db, "test_results", this.$route.params.id);
+        const docRef = doc(db, "assessments", this.$route.params.id);
         getDoc(docRef).then(docSnap => {
             if (docSnap.exists()) {
                 const questions = docSnap.data().questions;
@@ -297,7 +229,7 @@ export default {
                 this.result = {id: docSnap.id, ...docSnap.data()};
 
                 this.setNavbarConfig({
-                    title: `${this.result.test_name} Test Result`,
+                    title: `${this.result.from_userdata.first_name} assessment for ${this.result.for_userdata.first_name}`,
                     goBack: true,
                     plain: true,
                     hideBottomNav: true

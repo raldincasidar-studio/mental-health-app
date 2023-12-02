@@ -48,15 +48,21 @@
                         </div>
 
                         
-                        <h1>Test History</h1>
+                        <h1 v-if="user?.allowAccess?.includes(this.userData.uid)">Test History</h1>
 
                         <div class="request-access text-center my-12 px-3" v-if="!user?.allowAccess?.includes(this.userData.uid)">
                             <v-icon size="70" class="my-2">mdi-shield-lock</v-icon>
                             <h3 class="my-2">Access is locked!</h3>
-                            <p class="my-2 grey--text">Send request access to {{ user.first_name }} to access the test results</p>
+                            <p class="my-2 grey--text">Send request access to {{ user.first_name }} to access medical data</p>
                             <v-btn outlined class="mt-5" @click="sendRequestAccess()" :disabled="requestAccessLoading" :loading="requestAccessLoading">Request Access</v-btn>
                         </div>
                         <test-history v-else :test_results="test_results" :me="user.first_name"></test-history>
+                        
+                        <div v-if="user?.allowAccess?.includes(this.userData.uid)">
+                            <h1>Recent Assessments</h1>
+
+                            <assessment :test_results="assessments" :me="user.first_name"></assessment>
+                        </div>
                     </div>
 
                     <table v-else class="mt-n5 mb-12" style="table-layout: fixed; width: 100%">
@@ -235,6 +241,7 @@ export default {
             user: {},
             diaries: [],
             test_results: [],
+            assessments: [],
             requestAccessLoading: false,
         }
     },
@@ -267,18 +274,34 @@ export default {
         
         // FETCH TEST RESULTS
         getDocs(query(collection(db, 'test_results'), orderBy('date_added', 'desc'), where('by', '==', this.$route.params.id))).then(results => {
-                results.forEach(doc => {
-                    this.test_results.push({id: doc.id, ...doc.data()});
-                });
+            results.forEach(doc => {
+                this.test_results.push({id: doc.id, ...doc.data()});
+            });
 
 
-                if (results.size < 1) {
-                    this.test_results = "EMPTY";
-                }
-            }).catch(error => {
-                console.error(error);
+            if (results.size < 1) {
                 this.test_results = "EMPTY";
-            })
+            }
+        }).catch(error => {
+            console.error(error);
+            this.test_results = "EMPTY";
+        })
+        
+        // FETCH ASSESSMENTS
+        getDocs(query(collection(db, 'assessments'), orderBy('date', 'desc'), where('for', '==', this.$route.params.id))).then(results => {
+            console.log(results);
+            results.forEach(doc => {
+                this.assessments.push({id: doc.id, ...doc.data()});
+            });
+
+
+            if (results.size < 1) {
+                this.assessments = "EMPTY";
+            }
+        }).catch(error => {
+            console.error(error);
+            this.assessments = "EMPTY";
+        })
 
 
         // FETCH DIARIES

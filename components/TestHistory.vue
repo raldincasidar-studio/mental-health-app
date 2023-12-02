@@ -1,7 +1,7 @@
 <template>
 <div v-if="test_results == 'EMPTY'" class="text-center">
     <v-icon class="ma-10" size="60">mdi-file-document-outline</v-icon>
-    <h2 style="font-weight: normal" class="mb-10">{{ me ? me : 'You' }} have no Tests yet</h2>
+    <h3 style="font-weight: normal" class="mb-10">{{ me ? me : 'You' }} have no Tests yet</h3>
     <v-btn color="primary" text large v-if="!me">
         <v-icon left>mdi-plus</v-icon>
         Take Test

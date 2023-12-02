@@ -26,20 +26,18 @@
                 <div class="content pa-3">
                     <h2>{{ question.content }} (0 - Never, 5 - Always)</h2>
                     <div class="buttons">
-                        <v-btn @click="questions[i].answer = 0; page = String(i+2)" block large depressed :outlined="question.answer != 0" class="my-3" color="primary">0 - Never</v-btn>
-                        <v-btn @click="questions[i].answer = 1; page = String(i+2)" block large depressed :outlined="question.answer != 1" class="my-3" color="primary">1 - Very Seldom</v-btn>
-                        <v-btn @click="questions[i].answer = 2; page = String(i+2)" block large depressed :outlined="question.answer != 2" class="my-3" color="primary">2 - Sometimes</v-btn>
-                        <v-btn @click="questions[i].answer = 3; page = String(i+2)" block large depressed :outlined="question.answer != 3" class="my-3" color="primary">3 - Neutral</v-btn>
-                        <v-btn @click="questions[i].answer = 4; page = String(i+2)" block large depressed :outlined="question.answer != 4" class="my-3" color="primary">4 - Very Often</v-btn>
-                        <v-btn @click="questions[i].answer = 5; page = String(i+2)" block large depressed :outlined="question.answer != 5" class="my-3" color="primary">5 - Always</v-btn>
+                        <v-btn @click="questions[i].answer = 0; page = String(i+2)" block large depressed :outlined="question.answer != 0" class="my-3" color="primary">0 - Not at all</v-btn>
+                        <v-btn @click="questions[i].answer = 1; page = String(i+2)" block large depressed :outlined="question.answer != 1" class="my-3" color="primary">1 - Several days</v-btn>
+                        <v-btn @click="questions[i].answer = 2; page = String(i+2)" block large depressed :outlined="question.answer != 2" class="my-3" color="primary">2 - More than half the days</v-btn>
+                        <v-btn @click="questions[i].answer = 3; page = String(i+2)" block large depressed :outlined="question.answer != 3" class="my-3" color="primary">3 - Nearly Every day</v-btn>
                     </div>
                 </div>
             </v-window-item>
             <v-window-item :value="String(questions.length + 1)">
                 <div class="pa-3 end-test">
                     <v-responsive :aspect-ratio="3/2" class="test-image d-flex align-center px-5" :style="{border: `2px solid ${scoreToColor(test_score_percentage)}`}">
-                        <h5 :style="{color: scoreToColor(test_score_percentage)}">Test Result</h5>
-                        <h4 v-if="test_score_percentage <= 25">
+                        <h5 :style="{color: scoreToColor(test_score_percentage)}">Your score is:</h5>
+                        <!-- <h4 v-if="test_score_percentage <= 25">
                             Low
                         </h4>
                         <h4 v-else-if="test_score_percentage <= 50">
@@ -50,24 +48,31 @@
                         </h4>
                         <h4 v-else-if="test_score_percentage <= 100">
                             High
-                        </h4>
+                        </h4> -->
+                        <h4>{{ this.test_score }}</h4>
                     </v-responsive>
                     <h3 class="text-center mt-10">
                         You have a 
-                        <span v-if="test_score_percentage <= 25">
-                            low probability
+                        <span v-if="test_score <= 4">
+                            minimal
                         </span>
-                        <span v-else-if="test_score_percentage <= 50">
-                            mild probability
+                        <span v-else-if="test_score <= 9">
+                            mild
                         </span>
-                        <span v-else-if="test_score_percentage <= 75">
-                            moderate probability
+                        <span v-else-if="test_score <= 14">
+                            moderate
                         </span>
-                        <span v-else-if="test_score_percentage <= 100">
-                            high probability
+                        <span v-else-if="test_score > 14">
+                            severe
                         </span>
-                        of {{ info.name }}!
+                        {{ info.name }}
                     </h3>
+                    <ul class="my-5">
+                        <li style="list-style-type: none; margin: 10px 0"><b class="primary--text">0-4</b> - Minimal Anxiety</li>
+                        <li style="list-style-type: none; margin: 10px 0"><b class="primary--text">5-9</b> - Mild Anxiety</li>
+                        <li style="list-style-type: none; margin: 10px 0"><b class="primary--text">10-14</b> - Moderate Anxiety</li>
+                        <li style="list-style-type: none; margin: 10px 0"><b class="primary--text">15-21</b> - Severe Anxiety</li>
+                    </ul>
                     <p class="mt-10 text-justify">
                         <span v-if="test_score_percentage <= 25">
                             If your score falls within this range, it indicates a low probability of having the it. This means that based on your responses, the symptoms associated with it are less likely to be present.<br>
@@ -219,7 +224,7 @@ export default {
         },
         
         test_score_percentage() {
-            return Math.round( (this.test_score/(this.questions.length * 5)) * 100 );
+            return Math.round( (this.test_score/(this.questions.length * 3)) * 100 );
         }
     },
 

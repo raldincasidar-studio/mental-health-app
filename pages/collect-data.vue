@@ -27,15 +27,21 @@
 
         <v-text-field v-model="email" label="Email" append-icon="mdi-email" filled large class="my-1"></v-text-field>
         <v-text-field v-if="page == 'signup'" v-model="first_name" label="First Name" filled large class="my-1"></v-text-field>
-        <v-text-field v-if="page == 'signup'" v-model="middle_name" label="Initial Name" filled large class="my-1"></v-text-field>
+        <v-text-field v-if="page == 'signup'" v-model="middle_name" label="Initial Name (Optional)" filled large class="my-1"></v-text-field>
         <v-text-field v-if="page == 'signup'" v-model="last_name" label="Last Name" filled large class="my-1"></v-text-field>
         <v-select v-if="page == 'signup'" v-model="suffix" label="Suffix (Optional)" :items="['', 'Jr', 'Sr', 'II', 'III', 'IV', 'V']" filled large class="my-1"></v-select>
         <v-text-field v-if="page == 'signup'" v-model="date_of_birth" type="date" label="Date of Birth" filled large class="my-1"></v-text-field>
         <v-select :items="['Male', 'Female', 'Prefer not to say']" v-if="page == 'signup'" v-model="gender" label="Gender" filled large class="my-1"></v-select>
-        <v-text-field v-if="page == 'signup'" v-model="address" label="Address" filled large class="my-1"></v-text-field>
-        <v-text-field v-if="page == 'signup'" v-model="phone_number" label="Phone Number" prefix="+63" filled large class="my-1" maxlength="10"></v-text-field>
+        <!-- <v-text-field v-if="page == 'signup'" v-model="address" label="Address" filled large class="my-1"></v-text-field> -->
+        <v-select v-if="page == 'signup'" v-model="province" :items="provinces_list" item-text="name" item-value="name" @change="fetchCities()" label="Province" filled large class="my-1"></v-select>
+        <v-select v-if="page == 'signup'" v-model="city" :items="cities_list" :disabled="!cities_list.length" item-text="name" @change="fetchBrgys()" item-value="name" label="City/Municipality" filled large class="my-1"></v-select>
+        <v-select v-if="page == 'signup'" v-model="brgy" :items="barangay_list" item-text="name" item-value="name" :disabled="!barangay_list.length" label="Barangay" filled large class="my-1"></v-select>
+        <v-text-field v-if="page == 'signup'" v-model="street" :disabled="!brgy" label="Street" filled large class="my-1"></v-text-field>
+        <v-text-field v-if="page == 'signup'" v-model="house_no" :disabled="!brgy" label="House Number (Optional)" filled large class="my-1"></v-text-field>
+        <v-text-field type="number" v-if="page == 'signup'" v-model="phone_number" label="Phone Number" prefix="+63" filled large class="my-1" maxlength="10"></v-text-field>
         <v-text-field v-model="password" label="Password" append-icon="mdi-lock" type="password" filled large class="my-1"></v-text-field>
         <v-text-field v-if="page == 'signup'" v-model="confirm_password" label="Confirm Password" append-icon="mdi-lock" type="password" filled large class="my-1"></v-text-field>
+        <v-file-input v-if="page == 'signup' && userType == 'Doctor'" accept="*" v-model="credentials" ref="credential" class="my-1" filled large counter prepend-icon="mdi-file-sign" show-size truncate-length="25" label="Upload Professional Credentials"></v-file-input>
 
         <v-alert :type="/^(?=.*[a-z])(?=.*[^a-zA-Z0-9]).{6,}$/.test(password) && password == confirm_password ? 'success' : 'error'" class="text-left" text v-if="page == 'signup'">
             Password must contain atleast: <br>
@@ -108,11 +114,13 @@
 import { mapMutations, mapState } from 'vuex';
 import { app } from '@/server/firebase';
 import { getFirestore, setDoc, doc, getDoc, updateDoc } from "firebase/firestore";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import moment from 'moment';
 
 const db = getFirestore(app);
 const auth = getAuth();
+const storage = getStorage(app);
 
 export default {
 
@@ -127,6 +135,11 @@ export default {
             date_of_birth: '',
             gender: '',
             address: '',
+            province: '',
+            city: '',
+            brgy: '',
+            street: '',
+            house_no: '',
             phone_number: '',
             password: '',
             confirm_password: '',
@@ -136,6 +149,12 @@ export default {
             errorCode: '',
             page: 'login',
             moment: moment,
+
+            provinces_list: [],
+            cities_list: [],
+            barangay_list: [],
+
+            credentials: null,
         }
     },
 
@@ -146,6 +165,23 @@ export default {
             plain: false,
             hideBottomNav: true,
         })
+
+
+        fetch('https://psgc.gitlab.io/api/provinces/').then(data => data.json()).then(data => {
+            this.provinces_list = data.sort((a, b) => {
+                const nameA = a.name.toLowerCase(); // Convert names to lowercase for case-insensitive sorting
+                const nameB = b.name.toLowerCase();
+                
+                if (nameA < nameB) {
+                    return -1; // If nameA should come before nameB, return a negative value
+                }
+                if (nameA > nameB) {
+                    return 1; // If nameA should come after nameB, return a positive value
+                }
+                return 0; // If the names are equal
+            });;
+            console.log(data);
+        })
     },
 
     computed: {
@@ -154,6 +190,58 @@ export default {
 
     methods: {
         ...mapMutations('permaData', ['setNavbarConfig', 'setUserData']),
+
+        async fetchCities() {
+            
+            const provinceCode = ( this.provinces_list.filter(province => province.name === this.province) )[0] ;
+            
+            console.log('fetch cities province code: ', provinceCode.code);
+
+            this.cities_list = [];
+            fetch(`https://psgc.gitlab.io/api/provinces/${provinceCode.code}/cities-municipalities/`).then(data => data.json()).then(data => {
+                this.cities_list = data.sort((a, b) => {
+                    const nameA = a.name.toLowerCase(); // Convert names to lowercase for case-insensitive sorting
+                    const nameB = b.name.toLowerCase();
+                    
+                    if (nameA < nameB) {
+                        return -1; // If nameA should come before nameB, return a negative value
+                    }
+                    if (nameA > nameB) {
+                        return 1; // If nameA should come after nameB, return a positive value
+                    }
+                    return 0; // If the names are equal
+                });;
+                console.log(data);
+            })
+
+        },
+
+        async fetchBrgys() {
+            
+            const provinceCode = ( this.cities_list.filter(province => province.name === this.city) )[0] ;
+            
+            console.log('fetch barangay city code: ', provinceCode.code);
+
+            this.barangay_list = [];
+            fetch(`https://psgc.gitlab.io/api/cities-municipalities/${provinceCode.code}/barangays/`).then(data => data.json()).then(data => {
+                this.barangay_list = data.sort((a, b) => {
+                    const nameA = a.name.toLowerCase(); // Convert names to lowercase for case-insensitive sorting
+                    const nameB = b.name.toLowerCase();
+                    
+                    if (nameA < nameB) {
+                        return -1; // If nameA should come before nameB, return a negative value
+                    }
+                    if (nameA > nameB) {
+                        return 1; // If nameA should come after nameB, return a positive value
+                    }
+                    return 0; // If the names are equal
+                });;
+                console.log(data);
+            })
+
+        },
+
+
         async login() {
 
             this.isLoading = true;
@@ -172,13 +260,21 @@ export default {
 
             const user = request.user;
 
+            // SUCCESSFUL SIGNUP, GET USER DATA
+            const userData = await getDoc(doc(db, "user", user.uid));
+
+            if (userData.data().userType === 'Doctor' && !userData.data().verified) {
+                this.errorCode = 'Your professional account is not yet verified!';
+                this.isLoading = false;
+                this.password = '';
+                await signOut(auth);
+                return;
+            }
+
             // Add the notificationId
             await updateDoc(doc(db, "user", user.uid), {
                 notificationId: window.notificationRegistrationId || 'NONE'
             })
-
-            // SUCCESSFUL SIGNUP, GET USER DATA
-            const userData = await getDoc(doc(db, "user", user.uid));
 
             this.setUserData(userData.data());
 
@@ -187,10 +283,79 @@ export default {
             this.$router.push('/home-screen');
 
         },
+
+        generateRandomId(length) {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let id = '';
+
+        for (let i = 0; i < length; i++) {
+            const randomIndex = Math.floor(Math.random() * characters.length);
+            id += characters.charAt(randomIndex);
+        }
+
+        return id;
+        },
+
+        getFileExtension(file) {
+
+            const fileName = file;
+            const dotIndex = fileName.lastIndexOf('.');
+            if (dotIndex !== -1) {
+                return fileName.slice(dotIndex + 1).toLowerCase();
+            }
+            return ''; // If no extension found or file has no name
+        },
+
+
         async signup() {
+
+
+            
 
             this.isLoading = true;
             this.errorCode = '';
+
+            
+
+            if (
+            !this.email || 
+            !this.first_name || 
+            !this.last_name || 
+            !this.gender || 
+            !this.province || 
+            !this.city || 
+            !this.brgy || 
+            !this.street || 
+            !this.phone_number || 
+            !this.userType ||
+            !this.password 
+            ) {
+                this.errorCode = 'Required fields are empty'
+                this.isLoading = false;
+                return;
+            }
+
+            // Restrict some fields to only receive letters
+
+            if (
+                
+                ! /^[a-zA-Z]+$/.test(this.first_name) ||
+                (this.middle_name && ! /^[a-zA-Z]+$/.test(this.middle_name)) ||
+                ! /^[a-zA-Z]+$/.test(this.last_name) 
+            ) {
+                this.errorCode = 'Name should only contain letters'
+                this.isLoading = false;
+                return;
+            }
+
+            if (
+                
+                ! /^[0-9]+$/.test(this.phone_number)
+            ) {
+                this.errorCode = 'Phone number should only contain numbers'
+                this.isLoading = false;
+                return;
+            }
 
 
             if (! /^(?=.*[a-z])(?=.*[^a-zA-Z0-9]).{6,}$/.test(this.password)) {
@@ -219,6 +384,28 @@ export default {
             }
 
 
+
+            
+            
+            // PROCESS CREDENTIAL IF THE USERTYPE IS DOCTOR
+
+            let credentialAttachment = '';
+
+            if (this.userType === "Doctor") {
+
+                if (!this.credentials) {
+                    this.errorCode = 'Upload your professional credential!'
+                    this.isLoading = false;
+                    return;
+                }
+
+                const fileRef = ref(storage, `credentials/${this.last_name}-${this.generateRandomId(12)}.${this.getFileExtension(this.credentials.name)}`);
+
+                await uploadBytes(fileRef, this.credentials);
+
+                credentialAttachment = await getDownloadURL(fileRef);
+            }
+
             let signup;
 
             try {
@@ -244,9 +431,16 @@ export default {
                     suffix: this.suffix,
                     date_of_birth: this.date_of_birth,
                     gender: this.gender,
-                    address: this.address,
+                    province: this.province,
+                    city: this.city,
+                    brgy: this.brgy,
+                    street: this.street,
+                    house_no: this.house_no,
+                    address: `${this.province} ${this.city} ${this.brgy} ${this.street} ${this.house_no}`,
                     phone_number: this.phone_number,
                     userType: this.userType,
+                    credentialAttachment: credentialAttachment || '',
+                    verified: this.userType !== 'Doctor', // false if doctor by default
                     
                     // Add the notificationId
                     notificationId: window.notificationRegistrationId || 'NONE'
@@ -259,13 +453,25 @@ export default {
             }
 
             // SUCCESSFUL SIGNUP, GET USER DATA
-            const userData = await getDoc(doc(db, "user", user.uid));
 
-            this.setUserData(userData.data());
+            if (this.userType === 'Doctor') {
 
-            this.isLoading = false;
+                this.cancel();
+                alert('Your registration data is already submitted. Please wait for your credentials to be approved until you can login. You may receive an email or notification');
+                this.errorCode = 'Your registration data is already submitted. Please wait for your credentials to be approved until you can login. You may receive an email or notification';
+                this.isLoading = false;
+                this.page = 'login';
 
-            this.$router.push('/home-screen');
+            }else {
+                const userData = await getDoc(doc(db, "user", user.uid));
+    
+                this.setUserData(userData.data());
+    
+                this.isLoading = false;
+    
+                this.$router.push('/home-screen');
+            }
+
 
 
         },
