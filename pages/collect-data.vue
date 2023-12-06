@@ -188,6 +188,17 @@ export default {
         ...mapState('permaData', ['userTypeSelected'])
     },
 
+    watch: {
+        page: function(newVal, oldVal) {
+            this.setNavbarConfig({
+                title: newVal === "login" ? "Sign In" : 'Sign Up' ,
+                goBack: true,
+                plain: false,
+                hideBottomNav: true,
+            })
+        },
+    },
+
     methods: {
         ...mapMutations('permaData', ['setNavbarConfig', 'setUserData']),
 
@@ -337,16 +348,16 @@ export default {
 
             // Restrict some fields to only receive letters
 
-            if (
+            // if (
                 
-                ! /^[a-zA-Z]+$/.test(this.first_name) ||
-                (this.middle_name && ! /^[a-zA-Z]+$/.test(this.middle_name)) ||
-                ! /^[a-zA-Z]+$/.test(this.last_name) 
-            ) {
-                this.errorCode = 'Name should only contain letters'
-                this.isLoading = false;
-                return;
-            }
+            //     ! /^[a-zA-Z]+$/.test(this.first_name) ||
+            //     (this.middle_name && ! /^[a-zA-Z]+$/.test(this.middle_name)) ||
+            //     ! /^[a-zA-Z]+$/.test(this.last_name) 
+            // ) {
+            //     this.errorCode = 'Name should only contain letters'
+            //     this.isLoading = false;
+            //     return;
+            // }
 
             if (
                 
