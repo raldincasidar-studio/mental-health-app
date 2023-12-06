@@ -3,6 +3,7 @@
 //! moment.js locale configuration
 
 
+<<<<<<< HEAD
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -27,6 +28,8 @@
 /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
 
 
+=======
+>>>>>>> 6753d78cd45247f7e08684d2c4328419a27ec867
 /**
  * @license
  * Copyright 2019 Google LLC
@@ -113,20 +116,45 @@
  */
 
 
+<<<<<<< HEAD
 //! moment.js locale configuration
 
 /*!
  * Vue.js v2.7.14
  * (c) 2014-2022 Evan You
+=======
+/*!
+ * The buffer module from node.js, for the browser.
+ *
+ * @author   Feross Aboukhadijeh <http://feross.org>
+ * @license  MIT
+ */
+
+/*!
+ * vue-client-only v0.0.0-semantic-release
+ * (c) 2021-present egoist <0x142857@gmail.com>
+>>>>>>> 6753d78cd45247f7e08684d2c4328419a27ec867
  * Released under the MIT License.
  */
 
 /*!
+<<<<<<< HEAD
  * vuex v3.6.2
  * (c) 2021 Evan You
  * @license MIT
  */
 
+=======
+ * vue-no-ssr v1.1.1
+ * (c) 2018-present egoist <0x142857@gmail.com>
+ * Released under the MIT License.
+ */
+
+/*! (c) 2020 Andrea Giammarchi */
+
+/*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
+
+>>>>>>> 6753d78cd45247f7e08684d2c4328419a27ec867
 
 /**
  * @license
@@ -162,12 +190,19 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 //! moment.js locale configuration
 
 
 /**
  * @license
  * Copyright 2017 Google LLC
+=======
+
+/**
+ * @license
+ * Copyright 2022 Google LLC
+>>>>>>> 6753d78cd45247f7e08684d2c4328419a27ec867
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,3 +250,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+<<<<<<< HEAD
+=======
+
+
+/*!
+ * Vue.js v2.7.14
+ * (c) 2014-2022 Evan You
+ * Released under the MIT License.
+ */
+
+/*!
+ * vuex v3.6.2
+ * (c) 2021 Evan You
+ * @license MIT
+ */
+
+
+//! moment.js locale configuration
+>>>>>>> 6753d78cd45247f7e08684d2c4328419a27ec867
