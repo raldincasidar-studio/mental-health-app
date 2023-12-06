@@ -1,0 +1,251 @@
+<template>
+    <h1>Hello World</h1>
+</template>
+
+<script>
+import { addDoc, collection, getFirestore } from '@firebase/firestore';
+import { app } from '@/server/firebase';
+
+const db = getFirestore(app);
+
+
+export default {
+
+    mounted() {
+
+        const diseases = [
+            {
+                "date_added": new Date(),
+                "name": "Anxiety Disorder",
+                "description": "Anxiety disorders are characterized by persistent and excessive worry, fear, or anxiety that is difficult to control and often interferes with daily activities.",
+                "image": "https://media.istockphoto.com/id/1184108625/vector/mental-disorder-finding-answers-confusion-concept.jpg?s=612x612&w=0&k=20&c=GOvC4IR2oV9qFfSRhGOdQnDtAdQIcEdIlfSdAvgZ3as=",
+                "questions": [
+                "I feel restless or on edge.",
+                "I get easily fatigued or tired.",
+                "I have difficulty concentrating or my mind goes blank.",
+                "I feel irritable.",
+                "I experience muscle tension.",
+                "I have difficulty falling or staying asleep, or restless and unsatisfying sleep.",
+                "I feel anxious or worried.",
+                "I have recurrent thoughts, memories, or dreams related to anxiety.",
+                "I avoid situations or places that make me anxious.",
+                "I experience sudden or unexpected panic attacks.",
+                "I have a fear of losing control or going crazy.",
+                "I have a fear of dying or impending doom.",
+                "I experience heart palpitations, pounding heart, or accelerated heart rate.",
+                "I have shortness of breath or smothering sensations.",
+                "I feel dizzy, lightheaded, or faint.",
+                "I experience trembling or shaking.",
+                "I sweat excessively.",
+                "I have chest pain or discomfort.",
+                "I feel nauseous or have abdominal distress.",
+                "I feel hot or cold flashes.",
+                "I have a fear of social situations or being negatively judged.",
+                "I have difficulty speaking or choking sensations in social situations.",
+                "I avoid social situations or activities.",
+                "I have a fear of being alone or in situations from which escape might be difficult.",
+                "I have intrusive and unwanted thoughts, impulses, or images.",
+                "I perform repetitive behaviors or mental acts to prevent distress or harm."
+                ]
+            },
+            {
+                "date_added": new Date(),
+                "name": "Major Depressive Disorder",
+                "description": "Major depressive disorder is a mood disorder characterized by a persistent feeling of sadness, hopelessness, and a lack of interest or pleasure in activities.",
+                "image": "https://intermountainhealthcare.org/-/media/images/images-sc9/medical-specialties/behavioral-health/depression-illustration.ashx?h=1600&iar=0&w=2400",
+                "questions": [
+                "I feel sad or have a depressed mood.",
+                "I experience a loss of interest or pleasure in activities.",
+                "I have a significant weight loss or gain, or a change in appetite.",
+                "I have insomnia or hypersomnia nearly every day.",
+                "I have psychomotor agitation or retardation nearly every day.",
+                "I feel fatigued or have a lack of energy.",
+                "I feel worthless or excessively guilty.",
+                "I have difficulty concentrating or making decisions.",
+                "I have recurrent thoughts of death or suicide.",
+                "I experience changes in appetite, weight, or sleep.",
+                "I have diminished interest or pleasure in activities.",
+                "I feel slowed down or restless.",
+                "I have decreased or increased motor activity.",
+                "I have feelings of worthlessness or excessive or inappropriate guilt.",
+                "I have difficulty thinking, concentrating, or making decisions.",
+                "I have recurrent thoughts of death, suicidal ideation, or suicide attempts.",
+                "I experience feelings of hopelessness or despair.",
+                "I have changes in appetite, weight, or sleep patterns.",
+                "I have decreased energy or fatigue.",
+                "I have difficulty sleeping or excessive sleeping.",
+                "I have psychomotor agitation or retardation.",
+                "I have feelings of worthlessness or excessive guilt.",
+                "I have difficulty concentrating or making decisions.",
+                "I have a loss of interest or pleasure in activities.",
+                "I experience feelings of sadness, emptiness, or hopelessness."
+                ]
+            },
+            {
+                "date_added": new Date(),
+                "name": "Bipolar Disorder",
+                "description": "Bipolar disorder is a mental disorder characterized by alternating periods of elevated mood (mania) and depressive episodes.",
+                "image": "https://www.godigit.com/content/dam/godigit/directportal/en/contenthm/bipolar-disorder.jpg",
+                "questions": [
+                "I experience periods of abnormally elevated mood or irritability.",
+                "I have inflated self-esteem or grandiosity.",
+                "I have a decreased need for sleep.",
+                "I have increased talkativeness or pressure to keep talking.",
+                "I have racing thoughts or a flight of ideas.",
+                "I have distractibility or an increased focus on irrelevant stimuli.",
+                "I have an increase in goal-directed activity or psychomotor agitation.",
+                "I engage in excessive involvement in pleasurable activities with a high potential for painful consequences.",
+                "I experience a distinct period of abnormally and persistently elevated, expansive, or irritable mood.",
+                "I have an increase in self-esteem or grandiosity.",
+                "I have a decreased need for sleep.",
+                "I experience pressured speech or a feeling of being compelled to keep talking.",
+                "I have racing thoughts or a flight of ideas.",
+                "I have distractibility or difficulty concentrating.",
+                "I have an increase in goal-directed activity or psychomotor agitation.",
+                "I engage in activities that have a high potential for painful consequences.",
+                "I feel down or have a depressed mood.",
+                "I have a loss of interest or pleasure in activities.",
+                "I experience significant weight loss or gain, or a change in appetite.",
+                "I have insomnia or hypersomnia nearly every day.",
+                "I have psychomotor agitation or retardation nearly every day.",
+                "I feel fatigued or have a lack of energy.",
+                "I have feelings of worthlessness or excessive guilt.",
+                "I have difficulty concentrating or making decisions.",
+                "I have recurrent thoughts of death or suicide."
+                ]
+            },
+
+            {
+                "date_added": new Date(),
+                "name": "Attention Deficit Hyperactivity Disorder (ADHD)",
+                "description": "ADHD is a neurodevelopmental disorder characterized by persistent patterns of inattention, hyperactivity, and impulsivity that interfere with daily functioning and development.",
+                "image": "https://media.istockphoto.com/id/1357251415/vector/man-suffers-from-obsessive-thoughts-headache-unresolved-issues-psychological-trauma.jpg?s=612x612&w=0&k=20&c=ruxgmYkYcp3XncfeqLF_1wYE5Jv9U2m1SEWa86uAzgI=",
+                "questions": [
+                "I have difficulty paying attention to details or making careless mistakes.",
+                "I have trouble sustaining attention in tasks or activities.",
+                "I often seem not to listen when spoken to directly.",
+                "I struggle to follow through on instructions or complete tasks.",
+                "I have difficulty organizing tasks and activities.",
+                "I avoid or dislike tasks that require sustained mental effort.",
+                "I often lose things necessary for tasks or activities.",
+                "I get easily distracted by external stimuli.",
+                "I am forgetful in daily activities.",
+                "I often fidget or squirm in my seat.",
+                "I have difficulty staying seated in situations where it's expected.",
+                "I am constantly on the go or driven by a sense of restlessness.",
+                "I have difficulty engaging in activities quietly.",
+                "I often talk excessively or impulsively interrupt others.",
+                "I have trouble waiting my turn or delaying gratification.",
+                "I frequently blurt out answers before the questions are completed.",
+                "I have difficulty waiting for my turn or standing in line.",
+                "I often interrupt or intrude on others."
+                ]
+            },
+            {
+                "date_added": new Date(),
+                "name": "Obsessive-Compulsive Disorder (OCD)",
+                "description": "OCD is a mental disorder characterized by recurring, unwanted thoughts (obsessions) and repetitive behaviors or mental acts (compulsions) that individuals feel driven to perform.",
+                "image": "https://media.istockphoto.com/id/1289053196/vector/woman-suffering-from-ocd-and-cleaning-her-house-with-magnifier-and-tweezers-isolated-on.jpg?s=612x612&w=0&k=20&c=oiSTrqW8MHl66PT99aiNhQWfAhGTEhr-2OS2rpiaSc8=",
+                "questions": [
+                "I have persistent thoughts or images that intrude into my mind.",
+                "I feel the need to engage in excessive handwashing, cleaning, or grooming.",
+                "I have a strong need for symmetry or exactness in my surroundings.",
+                "I feel compelled to repeatedly check things or perform rituals.",
+                "I have intrusive thoughts that are distressing or forbidden.",
+                "I engage in repetitive behaviors to prevent or reduce anxiety.",
+                "I experience a sense of incompleteness or unfinished business.",
+                "I feel driven to repeat certain words, phrases, or actions.",
+                "I have unwanted thoughts of causing harm to myself or others.",
+                "I engage in repetitive behaviors related to ordering or arranging objects.",
+                "I have distressing thoughts that go against my values or beliefs.",
+                "I feel the need to confess or ask for reassurance repeatedly.",
+                "I have difficulty throwing away or parting with possessions.",
+                "I engage in repetitive mental acts such as counting or praying.",
+                "I experience intrusive sexual or aggressive thoughts.",
+                "I have the need to touch, tap, or rub objects or surfaces repeatedly.",
+                "I engage in behaviors to prevent or reduce obsessions and anxiety."
+                ]
+            },
+
+            {
+                "date_added": new Date(),
+                "name": "Schizophrenia",
+                "description": "Schizophrenia is a chronic mental disorder characterized by abnormal social behavior, disordered thinking, and hallucinations or delusions.",
+                "image": "https://media.istockphoto.com/id/1286189024/vector/mood-swing-concept-many-emotions-surround-young-female-with-bipolar-disorder-woman-suffers.jpg?s=612x612&w=0&k=20&c=qNlgrnmLEYnzJIRwMlR0EEP_0vB3cO9G8gqSP0qiXOU=",
+                "questions": [
+                "I experience hallucinations (e.g., hearing voices) that others cannot hear.",
+                "I have delusions or false beliefs that are not based on reality.",
+                "I struggle with disorganized speech or thinking.",
+                "I have a lack of motivation or reduced emotional expression.",
+                "I experience a decrease in daily functioning and self-care.",
+                "I have difficulty concentrating or sustaining attention.",
+                "I exhibit social withdrawal or isolation.",
+                "I exhibit unusual or bizarre behavior or movements.",
+                "I experience a decline in academic or occupational performance.",
+                "I have trouble sleeping or experience unusual sleep patterns.",
+                "I feel suspicious or paranoid of others.",
+                "I have difficulty expressing emotions appropriately.",
+                "I have trouble distinguishing between reality and imagination.",
+                "I experience a loss of interest or pleasure in activities.",
+                "I have a decline in personal hygiene and self-care.",
+                "I exhibit disorganized or catatonic behavior.",
+                "I hear voices or sounds that others cannot hear.",
+                "I have beliefs or thoughts that are not based on reality.",
+                "I struggle with disorganized thinking or speech.",
+                "I experience a lack of motivation or reduced emotional expression.",
+                "I have difficulty organizing or completing tasks.",
+                "I exhibit a lack of emotion or inappropriate emotional responses.",
+                "I have trouble concentrating or focusing.",
+                "I feel disconnected from reality or have a distorted perception of reality.",
+                "I have trouble expressing my thoughts or ideas coherently."
+                ]
+            },
+            {
+                "date_added": new Date(),
+                "name": "Post-Traumatic Stress Disorder (PTSD)",
+                "description": "PTSD is a mental disorder that can develop after experiencing or witnessing a traumatic event, leading to intrusive memories, avoidance, and changes in mood and cognition.",
+                "image": "https://mooditude.app/wp-content/uploads/2022/07/ptsd.jpeg",
+                "questions": [
+                "I have intrusive memories or flashbacks of the traumatic event.",
+                "I experience recurrent distressing dreams related to the traumatic event.",
+                "I have intense or prolonged distress when exposed to reminders of the traumatic event.",
+                "I have significant physiological reactions to cues that remind me of the traumatic event.",
+                "I avoid thoughts, feelings, or conversations associated with the traumatic event.",
+                "I avoid activities, places, or people that remind me of the traumatic event.",
+                "I have difficulty remembering important aspects of the traumatic event.",
+                "I have negative beliefs or expectations about myself, others, or the world.",
+                "I experience persistent negative emotional states.",
+                "I have a reduced interest or participation in activities I once enjoyed.",
+                "I feel detached from others or have a sense of estrangement.",
+                "I have difficulty experiencing positive emotions.",
+                "I feel irritable or have outbursts of anger.",
+                "I engage in reckless or self-destructive behavior.",
+                "I have difficulty concentrating or staying focused.",
+                "I have trouble sleeping or experience nightmares.",
+                "I feel hypervigilant or on constant alert.",
+                "I am easily startled or have an exaggerated startle response.",
+                "I have difficulty trusting others or forming close relationships.",
+                "I feel guilty or blame myself for the traumatic event.",
+                "I have intrusive thoughts or memories related to the traumatic event.",
+                "I struggle with intense emotional or physical reactions to reminders of the traumatic event.",
+                "I avoid people, places, or activities associated with the traumatic event.",
+                "I experience gaps in my memory or difficulty recalling specific details of the traumatic event.",
+                "I have negative beliefs about myself, others, or the world."
+                ]
+            }
+
+
+        ];
+
+        diseases.forEach(data => {
+
+            addDoc(collection(db, "tests"), data).then(docRef => {
+                console.log(`🆗: ${data.name} successfuly added to tests. `);
+            })
+
+        })
+
+    },
+
+}
+</script>
