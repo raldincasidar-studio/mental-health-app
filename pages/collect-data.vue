@@ -17,7 +17,7 @@
         <div class="d-flex gap-2 userType my-10" v-if="page == 'signup'">
             <v-card style="flex: 1" class="text-center pa-3 py-10 mr-4 border-3-transparent rounded-lg hidden-border" :class="{'selected': userType == 'Patient'}" @click="userType = 'Patient'">
                 <v-icon :color="userType == 'Patient' ? 'primary' : 'grey lighten-1'" size="60">mdi-account</v-icon>
-                <h4>I'm a Patient</h4>
+                <h4>I'm a Student</h4>
             </v-card>
             <v-card style="flex: 1" class="text-center pa-3 py-10 border-3-transparent rounded-lg hidden-border" :class="{'selected': userType == 'Doctor'}" @click="userType = 'Doctor'">
                 <v-icon :color="userType == 'Guardian' ? 'primary' : 'grey lighten-1'" size="60">mdi-doctor</v-icon>
