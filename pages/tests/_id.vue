@@ -24,20 +24,12 @@
                     <v-btn icon large color="blue" :disabled="question.answer === null" @click="page = String(i+2)"><v-icon>mdi-chevron-right</v-icon></v-btn>
                 </div>
                 <div class="content pa-3">
-<<<<<<< HEAD
-                    <h2>{{ question.content }} (0 - Never, 5 - Always)</h2>
-=======
                     <h2>{{ question.content }} (0 - Not at all, 3 - Nearly everyday)</h2>
->>>>>>> 6753d78cd45247f7e08684d2c4328419a27ec867
                     <div class="buttons">
                         <v-btn @click="questions[i].answer = 0; page = String(i+2)" block large depressed :outlined="question.answer != 0" class="my-3" color="primary">0 - Not at all</v-btn>
                         <v-btn @click="questions[i].answer = 1; page = String(i+2)" block large depressed :outlined="question.answer != 1" class="my-3" color="primary">1 - Several days</v-btn>
                         <v-btn @click="questions[i].answer = 2; page = String(i+2)" block large depressed :outlined="question.answer != 2" class="my-3" color="primary">2 - More than half the days</v-btn>
-<<<<<<< HEAD
-                        <v-btn @click="questions[i].answer = 3; page = String(i+2)" block large depressed :outlined="question.answer != 3" class="my-3" color="primary">3 - Nearly Every day</v-btn>
-=======
                         <v-btn @click="questions[i].answer = 3; page = String(i+2)" block large depressed :outlined="question.answer != 3" class="my-3" color="primary">3 - Nearly Everyday</v-btn>
->>>>>>> 6753d78cd45247f7e08684d2c4328419a27ec867
                     </div>
                 </div>
             </v-window-item>
@@ -82,19 +74,6 @@
                         <li style="list-style-type: none; margin: 10px 0"><b class="primary--text">15-21</b> - Severe Anxiety</li>
                     </ul>
                     <p class="mt-10 text-justify">
-<<<<<<< HEAD
-                        <span v-if="test_score_percentage <= 25">
-                            If your score falls within this range, it indicates a low probability of having the it. This means that based on your responses, the symptoms associated with it are less likely to be present.<br>
-                        </span>
-                        <span v-else-if="test_score_percentage <= 50">
-                            If your score falls within this range, it suggests a mild probability of the it. This means that there might be some indications of it, but further evaluation is needed to have a clearer understanding of your condition.<br>
-                        </span>
-                        <span v-else-if="test_score_percentage <= 75">
-                            Falling within this range means that there is a moderate probability of having the it. Your score is relatively higher, indicating a notable presence of symptoms associated with it. It's important to consult with a healthcare professional like me to discuss the results in more detail and explore potential treatment options.<br>
-                        </span>
-                        <span v-else-if="test_score_percentage <= 100">
-                            If your score falls within this range, it indicates a high probability of the it. Your score is significantly higher, suggesting a strong likelihood of the presence of symptoms associated with it. In this case, it is crucial to seek immediate attention from a healthcare professional like me. We will conduct a more comprehensive evaluation and determine the most appropriate intervention for your situation.
-=======
                         <span v-if="test_score <= 4">
                             If your score falls within this range, it indicates a low probability of having it. This means that based on your responses, the symptoms associated with it are less likely to be present.<br>
                         </span>
@@ -106,7 +85,6 @@
                         </span>
                         <span v-else-if="test_score <= 14">
                             If your score falls within this range, it indicates a high probability of it. Your score is significantly higher, suggesting a strong likelihood of the presence of symptoms associated with it. In this case, it is crucial to seek immediate attention from a healthcare professional like me. We will conduct a more comprehensive evaluation and determine the most appropriate intervention for your situation.
->>>>>>> 6753d78cd45247f7e08684d2c4328419a27ec867
                         </span>
                         <span v-else>
                             {{ info.description }}

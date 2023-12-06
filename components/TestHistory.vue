@@ -33,7 +33,7 @@
 
         <v-list-item-action>
         <v-btn icon>
-            <v-icon color="grey lighten-1">mdi-file-download</v-icon>
+            <v-icon color="grey lighten-1">mdi-link-variant</v-icon>
         </v-btn>
         </v-list-item-action>
     </v-list-item>

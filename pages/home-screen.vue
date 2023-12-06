@@ -130,11 +130,95 @@
                 </div>
             </div>
             <div class="py-2">
-                <h3>
-                    Assessed Students today
-                    <v-btn icon>
-                        <v-icon color="primary">mdi-file-sign</v-icon>
-                    </v-btn>
+                <vue-html2pdf ref="html2Pdf" :enable-download="true" :paginate-elements-by-height="1400" filename="MindfulAid Assessment Report" :show-layout="false" :float-layout="true">
+                    <section slot="pdf-content" style="">
+                        <div class="bg-white pa-4" style="background-color: white; padding: 30px">
+                            <p style="text-align:center"><span style="font-size:9px"><img alt="" src="/app-icon.png" style="height:83px; width:80px" /></span></p>
+
+                            <p style="text-align:center"><span style="font-size:18px"><strong>MindfulAid</strong></span><br />
+                            <span style="font-size:16px"><strong>Assessment Report</strong></span><br />
+                            <span style="font-size:16px"><strong>{{ moment(date_range[0]).format('MMMM DD, YYYY') }} - {{ moment(date_range[1]).format('MMMM DD, YYYY') }}</strong></span><br />
+                            &nbsp;</p>
+
+                            <p style="text-align:center"><span style="font-size:16px"><strong>Professional: {{ userData.first_name }} {{ userData.middle_name }} {{ userData.last_name }}</strong></span></p>
+
+                            <hr />
+                            <table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+                                <tbody>
+                                    <tr>
+                                        <td style="width:400px"><strong>Date</strong></td>
+                                        <td style="width:400px"><strong>Student Name</strong></td>
+                                        <td style="width:502px"><strong>Assessment</strong></td>
+                                    </tr>
+                                    <tr v-for="(result, i) in assessments" :key="i">
+                                        <td style="width:400px">{{ moment(result.date.toDate()).format('MMMM D, YYYY') }}</td>
+                                        <td style="width:400px">{{ result.for_userdata.first_name }} {{ result.for_userdata.middle_name }} {{ result.for_userdata.last_name }}</td>
+                                        <td style="width:502px">{{ result.assessment }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <hr />
+                            <p style="text-align:center">Generated at {{ moment().format('MMMM-DD-YYYY hh:mm a') }} by <a href="https://mindfulaid.vercel.app/">@<strong>MindfulAid</strong></a></p>
+
+                        </div>
+                    </section>
+                </vue-html2pdf>
+                <h3 class="d-flex justify-space-between items-center">
+                    <span>
+                        Assessed Students today<br>
+                        <i v-if="date_range[0] == date_range[1]" style="font-size: 0.7em; font-weight: normal; opacity: 0.8">({{ moment(date_range[0]).format('MMMM DD, YYYY') }})</i>
+                        <i v-else style="font-size: 0.7em; font-weight: normal; opacity: 0.8">({{ moment(date_range[0]).format('MMMM DD, YYYY') }} - {{ moment(date_range[1]).format('MMMM DD, YYYY') }})</i>
+                    </span>
+                    <span>
+                        <v-dialog
+                            ref="dialog"
+                            v-model="modal"
+                            :return-value.sync="date_range"
+                            persistent
+                            width="290px"
+                        >
+                            <template v-slot:activator="{ on, attrs }">
+                                <!-- <v-text-field
+                                    v-model="date"
+                                    label="Picker in dialog"
+                                    prepend-icon="mdi-calendar"
+                                    readonly
+                                    v-bind="attrs"
+                                    v-on="on"
+                                ></v-text-field>
+                                -->
+                                <v-btn icon v-bind="attrs" v-on="on">
+                                    <v-icon color="primary">mdi-calendar-range</v-icon>
+                                </v-btn>
+                            </template>
+                            <v-date-picker
+                                v-model="date_range"
+                                scrollable
+                                range
+                            >
+                            <v-spacer></v-spacer>
+                            <v-btn
+                                text
+                                color="primary"
+                                @click="resetDateRange()"
+                                :allowed-date="allowed_date"
+                            >
+                                Cancel
+                            </v-btn>
+                            <v-btn
+                                text
+                                color="primary"
+                                @click="saveDateRange(date_range)"
+                            >
+                                OK
+                            </v-btn>
+                            </v-date-picker>
+                        </v-dialog>
+                        <v-btn icon @click="generateReport()">
+                            <v-icon color="orange">mdi-printer</v-icon>
+                        </v-btn>
+                    </span>
                 </h3>
 
                 <assessment :test_results="assessments" v-if="assessments"></assessment>
@@ -385,10 +469,15 @@ import { mapMutations, mapState } from 'vuex';
 import { app } from '@/server/firebase';
 import { collection, getDocs, getFirestore, limit, orderBy, query, where, serverTimestamp } from '@firebase/firestore';
 import moment from 'moment';
+import VueHtml2pdf from 'vue-html2pdf'
 
 const db = getFirestore(app);
 
 export default {
+
+    components: {
+        VueHtml2pdf,
+    },
 
     computed: {
         ...mapState('permaData', ['userData', 'homePageSelector']),
@@ -431,6 +520,10 @@ export default {
     methods: {
         ...mapMutations('permaData', ['setNavbarConfig', 'setHomePageSelector']),
 
+
+        generateReport () {
+            this.$refs.html2Pdf.generatePdf()
+        },
 
         getURLParams(param) {
 
@@ -525,9 +618,12 @@ export default {
                     console.log(this.topPatientsList);
                 });
 
-                var startOfToday = new Date(); 
+                console.warn('Date 1', this.date_range[0])
+                console.warn('Date 2', this.date_range[1])
+
+                var startOfToday = new Date(moment(this.date_range[0], 'YYYY-MM-DD')); 
                 startOfToday.setHours(0,0,0,0);
-                var endOfToday = new Date(); 
+                var endOfToday = new Date(moment(this.date_range[1], 'YYYY-MM-DD')); 
                 endOfToday.setHours(23,59,59,999);
 
                 // FETCH ASSESSMENTS
@@ -555,6 +651,14 @@ export default {
             now.setHours(5, 0, 0, 0) // +5 hours for Eastern Time
             const timestamp = serverTimestamp()
             return timestamp // ex. 1631246400
+        },
+
+        resetDateRange() {
+
+            this.date_range = [ moment().format('YYYY-MM-DD'), moment().format('YYYY-MM-DD') ];
+
+            this.modal = false;
+
         },
 
         initHistoryPage() {
@@ -608,6 +712,11 @@ export default {
 
         },
 
+        saveDateRange(date_range) {
+            this.$refs.dialog.save(date_range);
+            this.initHomePage();
+        },
+
         async newQuote() {
             this.dailyQuotes = '';
 
@@ -654,6 +763,14 @@ export default {
             topPatientsList: [],
 
             assessments: [],
+
+            dialog: false,
+
+            modal: false,
+
+            date_range: [ moment().format('YYYY-MM-DD'), moment().format('YYYY-MM-DD') ],
+
+            allowed_date: val => val <= moment().format('YYYY-MM-DD'),
         }
     },
     

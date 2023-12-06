@@ -17,8 +17,77 @@
                     {{ moment(result.date_added?.toDate()).format('MMMM DD, YYYY hh:ss A') }}
                 </p>
 
+                <vue-html2pdf ref="html2Pdf" :enable-download="true" :paginate-elements-by-height="1400" :filename="`${ result.test_name } Test Result of ${ result.last_name }, ${ result.first_name } - MindfulAid`" :show-layout="false" :float-layout="true">
+                    <section slot="pdf-content" style="">
+                        <div class="bg-white pa-4" style="background-color: white; padding: 30px">
+                            <p style="text-align:center"><span style="font-size:9px"><img alt="" src="/app-icon.png" style="height:83px; width:80px" /></span></p>
+
+                            <p style="text-align:center"><span style="font-size:18px"><strong>MindfulAid</strong></span><br />
+                            <span style="font-size:16px"><strong>{{ result.test_name }} Test Result</strong></span><br />
+                            <span style="font-size:16px"><strong>Date Taken: {{ moment(result.date_added?.toDate()).format('MMMM DD, YYYY hh:ss A') }}</strong></span><br />
+                            &nbsp;</p>
+
+                            <p style="text-align:center"><span style="font-size:16px"><strong>Student: {{ result.first_name }} {{ result.last_name }}</strong></span></p>
+
+                            <hr />
+                            <p><strong><span style="font-size:20px">{{ result.test_name }} Test</span></strong></p>
+
+                            <table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+                                <tbody>
+                                    <tr>
+                                        <td style="width:563px"><strong>Result</strong></td>
+                                        <td style="width:620px"><strong>Interpretation</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width:563px">{{result.result}}</td>
+                                        <td style="width:620px">
+                                            <span v-if="result.result <= 4">
+                                                Minimal
+                                            </span>
+                                            <span v-else-if="result.result <= 9">
+                                                Mild
+                                            </span>
+                                            <span v-else-if="result.result <= 14">
+                                                Moderate
+                                            </span>
+                                            <span v-else-if="result.result > 14">
+                                                Severe
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <hr />
+                            <table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+                                <tbody>
+                                    <tr>
+                                        <td style="width:40px"><strong>No.</strong></td>
+                                        <td style="width:654px">Test Prompt</td>
+                                        <td style="width:502px">Answer</td>
+                                    </tr>
+                                    <tr v-for="(question, i) in result.answers" :key="i">
+                                        <td style="width:40px">{{ i + 1 }}</td>
+                                        <td style="width:654px">{{ question.content }}</td>
+                                        <td style="width:502px">{{ question.answer }} - {{ scoreToDescription(question.answer) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <hr />
+                            <p style="text-align:center">&nbsp;</p>
+
+                            <p style="text-align:center">&nbsp;</p>
+
+                            <p style="text-align:center">Generated at {{ moment().format('MMMM-DD-YYYY hh:mm a') }} by <a href="https://mindfulaid.vercel.app/">@<strong>MindfulAid</strong></a></p>
+
+
+                        </div>
+                    </section>
+                </vue-html2pdf>
+
                 <div class="my-3">
-                    <v-btn large elevation="0" color="primary">
+                    <v-btn large elevation="0" color="primary" @click="generateReport()">
                         Save
                     </v-btn>
                     <v-dialog v-model="share_dialog">
@@ -151,6 +220,10 @@ export default {
 
     methods: {
         ...mapMutations('permaData', ['setNavbarConfig']),
+
+        generateReport () {
+            this.$refs.html2Pdf.generatePdf()
+        },
 
         forwardTestResult(user) {
 

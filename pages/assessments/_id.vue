@@ -22,8 +22,37 @@
                     {{ moment(result.date?.toDate()).format('MMMM DD, YYYY hh:ss A') }}
                 </p>
 
+                <vue-html2pdf ref="html2Pdf" :enable-download="true" :paginate-elements-by-height="1400" :filename="`Assessment note of ${result.for_userdata.last_name} (${moment(result.date?.toDate()).format('MMMM DD, YYYY')}) - MindfulAid`" :show-layout="false" :float-layout="true">
+                    <section slot="pdf-content" style="">
+                        <div class="bg-white pa-4" style="background-color: white; padding: 30px">
+                            <p style="text-align:center"><span style="font-size:9px"><img alt="" src="/app-icon.png" style="height:83px; width:80px" /></span></p>
+
+                            <p style="text-align:center"><span style="font-size:18px"><strong>MindfulAid</strong></span><br />
+                            <span style="font-size:16px"><strong>Assessment Note for {{ result.for_userdata.first_name }} {{ result.for_userdata.middle_name }} {{ result.for_userdata.last_name }}</strong></span><br />
+                            <span style="font-size:16px"><strong>Date Assessed: {{ moment(result.date?.toDate()).format('MMMM DD, YYYY hh:ss A') }}</strong></span><br />
+                            &nbsp;</p>
+
+                            <p style="text-align:center"><span style="font-size:16px"><strong>Professional Assessor: {{ result.from_userdata.first_name }} {{ result.from_userdata.middle_name }} {{ result.from_userdata.last_name }}<br />
+                            Student Assessed: {{ result.for_userdata.first_name }} {{ result.for_userdata.middle_name }} {{ result.for_userdata.last_name }}</strong></span></p>
+
+                            <hr />
+                            <p><strong><span style="font-size:20px">Assessment Note:</span></strong></p>
+
+                            <p><strong><span style="font-size:16px">{{ result.assessment }}</span></strong></p>
+
+                            <hr />
+                            <p style="text-align:center">&nbsp;</p>
+
+                            <p style="text-align:center">&nbsp;</p>
+
+                            <p style="text-align:center">Generated at {{ moment().format('MMMM-DD-YYYY hh:mm a') }} by <a href="https://mindfulaid.vercel.app/">@<strong>MindfulAid</strong></a></p>
+
+                        </div>
+                    </section>
+                </vue-html2pdf>
+
                 <div class="my-3">
-                    <v-btn large elevation="0" color="primary">
+                    <v-btn large elevation="0" color="primary" @click="generateReport()">
                         Save
                     </v-btn>
                 </div>
@@ -83,6 +112,10 @@ export default {
 
     methods: {
         ...mapMutations('permaData', ['setNavbarConfig']),
+
+        generateReport () {
+            this.$refs.html2Pdf.generatePdf()
+        },
 
         forwardTestResult(user) {
 
